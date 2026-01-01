@@ -1,0 +1,42 @@
+<svg width="512" height="512" viewBox="0 0 512 512"
+     xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Explicit transparent canvas -->
+  <rect width="512" height="512" fill="transparent"/>
+
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Purple rounded background shape -->
+  <rect x="2" y="2" width="508" height="508" rx="110" fill="url(#bgGradient)"/>
+
+  <!-- Calculator body (white, must stay white) -->
+  <rect x="72" y="72" width="368" height="368" rx="40" fill="#ffffff"/>
+
+  <!-- Calculator display -->
+  <rect x="108" y="104" width="296" height="56" rx="16" fill="#e5e7eb"/>
+
+  <!-- Buttons -->
+  <g fill="#d1d5db">
+    <rect x="108" y="184" width="64" height="64" rx="14"/>
+    <rect x="196" y="184" width="64" height="64" rx="14"/>
+    <rect x="284" y="184" width="64" height="64" rx="14"/>
+
+    <rect x="108" y="272" width="64" height="64" rx="14"/>
+    <rect x="196" y="272" width="64" height="64" rx="14"/>
+    <rect x="284" y="272" width="64" height="64" rx="14"/>
+
+    <rect x="108" y="360" width="64" height="64" rx="14"/>
+    <rect x="196" y="360" width="64" height="64" rx="14"/>
+    <rect x="284" y="360" width="64" height="64" rx="14"/>
+  </g>
+
+  <!-- Musical note -->
+  <path d="M360 132v192c0 36-26 64-64 64s-64-28-64-64
+           26-64 64-64c12 0 24 4 36 10v-120l136-32v-56l-108 26z"
+        fill="#111827"/>
+</svg>
