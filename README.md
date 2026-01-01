@@ -160,32 +160,6 @@ A cross-platform music production utility application built with Go and Fyne. Pr
    fyne package -os darwin -icon Icon.png
    ```
 
-## Development
-
-### Project Structure
-
-```
-musicalc/
-├── main.go              # Application entry point
-├── internal/
-│   ├── logic/          # Business logic
-│   │   ├── tempo.go    # Tempo calculations
-│   │   ├── sampler.go  # Sampler calculations
-│   │   ├── diapason.go # Frequency/tuning calculations
-│   │   └── helpers.go  # Utility functions
-│   └── ui/             # UI components
-│       ├── tempo.go    # Tempo tab UI
-│       ├── sampler.go  # Sampler tab UI
-│       └── diapason.go # Tuning tab UI
-└── go.mod
-```
-
-### Running in Development
-
-```bash
-go run main.go
-```
-
 ## Requirements
 
 - Go 1.24.5 or later
