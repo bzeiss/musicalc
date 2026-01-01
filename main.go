@@ -21,8 +21,8 @@ func main() {
 	}
 
 	tabs := container.NewAppTabs(
-		container.NewTabItem("Tempo to Delay", ui.NewTempoTab()),
-		container.NewTabItem("Note to Frequency", ui.NewDiapasonTab()),
+		container.NewTabItem("Tempo2Delay", ui.NewTempoTab()),
+		container.NewTabItem("Note2Freq", ui.NewDiapasonTab()),
 		container.NewTabItem("Sample Length", ui.NewSampleLengthTab()),
 		container.NewTabItem("Tempo Change", ui.NewTempoChangeTab()),
 	)

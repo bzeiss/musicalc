@@ -2,7 +2,7 @@ package ui
 
 import (
 	"fmt"
-	logic "musicalc/internal/Logic"
+	"musicalc/internal/logic"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"

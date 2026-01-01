@@ -2,7 +2,7 @@
 ; Music Calculator Application
 
 #define MyAppName "MusiCalc"
-#define MyAppVersion "0.8.0"
+#define MyAppVersion "0.7.0"
 #define MyAppPublisher "B. Zeiss"
 #define MyAppURL "https://github.com/bzeiss/musicalc"
 #define MyAppExeName "musicalc.exe"

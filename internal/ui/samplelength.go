@@ -2,7 +2,7 @@ package ui
 
 import (
 	"fmt"
-	logic "musicalc/internal/Logic"
+	"musicalc/internal/logic"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -33,41 +33,38 @@ func NewSampleLengthTab() fyne.CanvasObject {
 		"192000", // Ultra high-res
 	}
 
-	// Sample rate selector
+	// Sample rate selector (callback will be set after calcFromTempo is defined)
 	sampleRateSelect := widget.NewSelect(sampleRates, nil)
 	sampleRateSelect.SetSelected("44100")
 
 	// Beats input
 	beatsInput := widget.NewEntry()
-	beatsInput.SetText("4")
-	beatsInput.OnChanged = func(s string) {
-		_ = beats.Set(s)
-	}
 
 	// Bidirectional input/output fields
 	samplesEntry := widget.NewEntry()
-	samplesEntry.SetText("88200")
-
 	msEntry := widget.NewEntry()
-	msEntry.SetText("2000.00")
-
 	tempoEntry := widget.NewEntry()
-	tempoEntry.SetText("120.00")
 
 	// Flag to prevent circular updates
 	updating := false
 
+	// Declare calculation functions as variables first
+	var calcFromTempo func()
+	var calcFromSamples func()
+	var calcFromMS func()
+
 	// Reset function
 	resetToDefaults := func() {
+		updating = true
 		_ = sampleRate.Set("44100")
 		_ = beats.Set("4")
-		samplesEntry.SetText("88200")
-		msEntry.SetText("2000.00")
 		tempoEntry.SetText("120.00")
+		updating = false
+		calcFromTempo()
 	}
 
 	// Calculate from Tempo (when Tempo is input)
-	calcFromTempo := func() {
+	calcFromTempo = func() {
 		if updating {
 			return
 		}
@@ -87,7 +84,7 @@ func NewSampleLengthTab() fyne.CanvasObject {
 	}
 
 	// Calculate from Samples (when Samples is input)
-	calcFromSamples := func() {
+	calcFromSamples = func() {
 		if updating {
 			return
 		}
@@ -108,7 +105,7 @@ func NewSampleLengthTab() fyne.CanvasObject {
 	}
 
 	// Calculate from MS (when MS is input)
-	calcFromMS := func() {
+	calcFromMS = func() {
 		if updating {
 			return
 		}
@@ -133,15 +130,20 @@ func NewSampleLengthTab() fyne.CanvasObject {
 	samplesEntry.OnChanged = func(s string) { calcFromSamples() }
 	msEntry.OnChanged = func(s string) { calcFromMS() }
 
-	// Also recalculate when sample rate or beats change
+	// Set sample rate and beats callbacks now that functions are defined
 	sampleRateSelect.OnChanged = func(s string) {
 		_ = sampleRate.Set(s)
-		calcFromTempo() // Recalculate from current tempo
+		calcFromTempo()
 	}
+	beatsInput.SetText("4")
 	beatsInput.OnChanged = func(s string) {
 		_ = beats.Set(s)
-		calcFromTempo() // Recalculate from current tempo
+		calcFromTempo()
 	}
+
+	// Initialize values on startup
+	tempoEntry.SetText("120.00")
+	calcFromTempo()
 
 	// Reset button
 	resetBtn := widget.NewButton("↻", func() {
