@@ -2,7 +2,7 @@
 
 A cross-platform music calculator application built with Go and Fyne. Provides real-time calculators for tempo, pitch, sampling, and time-stretching operations commonly used in music production and audio engineering.
 
-This project is heavily inspired by [MusicMath](https://dev.laurentcolson.com/musicmath.html), an excellent tool currently exclusive to the Apple ecosystem. This version aims to bring that same utility to all platforms, reimagined with a unique look and feel. To support the original creator, I will not be providing pre-compiled macOS binaries; I encourage macOS users to purchase the original MusicMath instead. However, the source remains open for those who prefer to build it manually.
+This project is heavily inspired by [MusicMath](https://dev.laurentcolson.com/musicmath.html), an excellent tool currently exclusive to the Apple ecosystem. This version aims to bring that same utility to all platforms, with a simpler look and feel. To support the original creator, I will not be providing pre-compiled macOS binaries; I encourage macOS users to purchase the original MusicMath instead. However, the source remains open for those who prefer to build it manually.
 
 ## Features
 
