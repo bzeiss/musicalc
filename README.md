@@ -1,6 +1,6 @@
-# MusiCalc - Music Engineering Toolkit
+# MusiCalc
 
-A cross-platform music production utility application built with Go and Fyne. Provides real-time calculators for tempo, pitch, sampling, and time-stretching operations commonly used in music production and audio engineering.
+A cross-platform music calculator application built with Go and Fyne. Provides real-time calculators for tempo, pitch, sampling, and time-stretching operations commonly used in music production and audio engineering.
 
 ## Features
 
