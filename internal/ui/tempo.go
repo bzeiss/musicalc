@@ -2,7 +2,7 @@ package ui
 
 import (
 	"fmt"
-	"musicalc/internal/logic"
+	logic "musicalc/internal/Logic"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -98,9 +98,9 @@ func NewTempoTab() fyne.CanvasObject {
 	// Hide row header column
 	table.ShowHeaderColumn = false
 
-	table.SetColumnWidth(0, 80)
-	table.SetColumnWidth(1, 120)
-	table.SetColumnWidth(2, 120)
+	table.SetColumnWidth(0, 150)
+	table.SetColumnWidth(1, 190)
+	table.SetColumnWidth(2, 190)
 
 	bpm.AddListener(binding.NewDataListener(func() { table.Refresh() }))
 

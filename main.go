@@ -12,7 +12,7 @@ func main() {
 	myApp := app.NewWithID("com.musicalc")
 
 	window := myApp.NewWindow("MusiCalc")
-	window.Resize(fyne.NewSize(420, 750))
+	window.Resize(fyne.NewSize(620, 750))
 
 	// Load and set application icon (if available)
 	// Icon should be at: icons/appicon.png
@@ -21,9 +21,10 @@ func main() {
 	}
 
 	tabs := container.NewAppTabs(
-		container.NewTabItem("Tempo", ui.NewTempoTab()),
-		container.NewTabItem("Diapason", ui.NewDiapasonTab()),
+		container.NewTabItem("Tempo to Delay", ui.NewTempoTab()),
+		container.NewTabItem("Note to Frequency", ui.NewDiapasonTab()),
 		container.NewTabItem("Sample Length", ui.NewSampleLengthTab()),
+		container.NewTabItem("Tempo Change", ui.NewTempoChangeTab()),
 	)
 
 	tabs.SetTabLocation(container.TabLocationBottom) // Mobile ergonomic standard

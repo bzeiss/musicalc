@@ -3,7 +3,7 @@ package ui
 import (
 	"fmt"
 	"math"
-	"musicalc/internal/logic"
+	logic "musicalc/internal/Logic"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -195,10 +195,10 @@ func NewDiapasonTab() fyne.CanvasObject {
 	// Hide row header column
 	table.ShowHeaderColumn = false
 
-	table.SetColumnWidth(0, 80)
-	table.SetColumnWidth(1, 100)
-	table.SetColumnWidth(2, 80)
-	table.SetColumnWidth(3, 80)
+	table.SetColumnWidth(0, 130)
+	table.SetColumnWidth(1, 150)
+	table.SetColumnWidth(2, 130)
+	table.SetColumnWidth(3, 130)
 
 	// Add listeners to refresh table when inputs change
 	refFreq.AddListener(binding.NewDataListener(func() {
