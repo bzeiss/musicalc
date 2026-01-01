@@ -44,6 +44,7 @@ This project is heavily inspired by [MusicMath](https://dev.laurentcolson.com/mu
 ## TODOs
 
 - Timecode Calculator
+- support for different temperaments in Note To Frequency Calculator
 - Tap tempo (maybe)
 - Frequency to note
 
