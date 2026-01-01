@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"math"
 	"musicalc/internal/logic"
 
 	"fyne.io/fyne/v2"
@@ -58,7 +59,8 @@ func NewDiapasonTab() fyne.CanvasObject {
 				break
 			}
 		}
-		return (octave+1)*12 + noteIndex
+		// Our table starts at C-2 = MIDI 0 (not C-1 = MIDI 0 as in standard)
+		return (octave+2)*12 + noteIndex
 	}
 
 	// Reset function
@@ -73,21 +75,6 @@ func NewDiapasonTab() fyne.CanvasObject {
 	refNoteEntry.SetText("A3")
 	refNoteEntry.OnChanged = func(s string) {
 		_ = refNote.Set(s)
-
-		// Dynamically filter options based on input
-		if s == "" {
-			refNoteEntry.SetOptions(refNoteOptions)
-		} else {
-			var filtered []string
-			for _, opt := range refNoteOptions {
-				if len(opt) >= len(s) && opt[:len(s)] == s {
-					filtered = append(filtered, opt)
-				}
-			}
-			if len(filtered) > 0 {
-				refNoteEntry.SetOptions(filtered)
-			}
-		}
 	}
 
 	// Frequency input
@@ -106,6 +93,21 @@ func NewDiapasonTab() fyne.CanvasObject {
 	// Declare table variable first for use in reset button
 	var table *widget.Table
 
+	// Cache for performance - avoid binding.Get() on every cell render
+	var cachedRefMidi int
+	var cachedRefHz float64
+
+	// Update cache function
+	updateCache := func() {
+		refNoteVal, _ := refNote.Get()
+		refFreqVal, _ := refFreq.Get()
+		cachedRefMidi = getMidiNote(refNoteVal)
+		cachedRefHz = logic.ParseFloat(refFreqVal)
+	}
+
+	// Initialize cache
+	updateCache()
+
 	// Reset button
 	resetBtn := widget.NewButton("↻", func() {
 		resetToDefaults()
@@ -117,9 +119,9 @@ func NewDiapasonTab() fyne.CanvasObject {
 		}
 	})
 
-	// Table displaying all MIDI notes
+	// Table displaying all MIDI notes (C-2 to B8, MIDI 0-131)
 	table = widget.NewTableWithHeaders(
-		func() (int, int) { return 128, 4 },
+		func() (int, int) { return 132, 4 },
 		func() fyne.CanvasObject {
 			return widget.NewLabel("")
 		},
@@ -127,38 +129,38 @@ func NewDiapasonTab() fyne.CanvasObject {
 			l := o.(*widget.Label)
 			l.Alignment = fyne.TextAlignLeading
 
-			// Get reference note and frequency
-			refNoteVal, _ := refNote.Get()
-			refFreqVal, _ := refFreq.Get()
-			refMidi := getMidiNote(refNoteVal)
-			refHz := logic.ParseFloat(refFreqVal)
+			// MIDI note starts at 0 (C-2)
+			midiNote := id.Row
 
+			// Use cached values for performance (updated only when bindings change)
 			// Calculate frequency: freq = refFreq * 2^((thisMidi - refMidi)/12)
-			// Using manual calculation since we need semitone steps
-			semitones := float64(id.Row - refMidi)
-			ratio := 1.0
-			semitoneRatio := 1.0594630943592953 // 2^(1/12)
-
-			if semitones > 0 {
-				for i := 0; i < int(semitones); i++ {
-					ratio *= semitoneRatio
-				}
-			} else if semitones < 0 {
-				for i := 0; i < int(-semitones); i++ {
-					ratio /= semitoneRatio
-				}
-			}
-			hz := refHz * ratio
+			semitones := float64(midiNote - cachedRefMidi)
+			hz := cachedRefHz * math.Pow(2.0, semitones/12.0)
 
 			switch id.Col {
 			case 0:
-				l.SetText(fmt.Sprintf("%s %d", noteNames[id.Row%12], (id.Row/12)-1))
+				l.SetText(fmt.Sprintf("%s%d", noteNames[midiNote%12], (midiNote/12)-2))
 			case 1:
 				l.SetText(fmt.Sprintf("%.2f Hz", hz))
 			case 2:
 				l.SetText("+0.00")
 			case 3:
-				l.SetText(fmt.Sprintf("%d", id.Row))
+				// Show both MIDI conventions: standard (C4=60) / alternative (C3=60)
+				// MIDI values only go 0-127, show "-" for invalid values
+				midiStandard := midiNote
+				midiAlternative := midiNote + 12
+
+				standardStr := fmt.Sprintf("%d", midiStandard)
+				if midiStandard > 127 {
+					standardStr = "-"
+				}
+
+				alternativeStr := fmt.Sprintf("%d", midiAlternative)
+				if midiAlternative > 127 {
+					alternativeStr = "-"
+				}
+
+				l.SetText(fmt.Sprintf("%s / %s", standardStr, alternativeStr))
 			}
 		},
 	)
@@ -199,8 +201,14 @@ func NewDiapasonTab() fyne.CanvasObject {
 	table.SetColumnWidth(3, 80)
 
 	// Add listeners to refresh table when inputs change
-	refFreq.AddListener(binding.NewDataListener(func() { table.Refresh() }))
-	refNote.AddListener(binding.NewDataListener(func() { table.Refresh() }))
+	refFreq.AddListener(binding.NewDataListener(func() {
+		updateCache()
+		table.Refresh()
+	}))
+	refNote.AddListener(binding.NewDataListener(func() {
+		updateCache()
+		table.Refresh()
+	}))
 	tuning.AddListener(binding.NewDataListener(func() { table.Refresh() }))
 
 	// Build UI layout

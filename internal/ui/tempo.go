@@ -41,6 +41,9 @@ func NewTempoTab() fyne.CanvasObject {
 		{"1/32", 0.125},
 		{"1/32D", 0.1875},
 		{"1/32T", 1.0 / 12.0},
+		{"1/64", 0.0625},
+		{"1/64D", 0.09375},
+		{"1/64T", 1.0 / 24.0},
 	}
 
 	table := widget.NewTableWithHeaders(
