@@ -41,6 +41,12 @@ This project is heavily inspired by [MusicMath](https://dev.laurentcolson.com/mu
 - Swap tempo values with one click
 - Perfect for time-stretching audio, pitch correction, and sampler tuning
 
+## TODOs
+
+- Timecode Calculator
+- Tap tempo (maybe)
+- Frequency to note
+
 ## User Guide
 
 ### Tempo to Delay
