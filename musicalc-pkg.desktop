@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=MusiCalc
+Comment=Music Calculator Utility
+Exec=/usr/bin/musicalc
+Icon=musicalc
+Terminal=false
+Categories=Utility;Audio;

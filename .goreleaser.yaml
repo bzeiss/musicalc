@@ -38,7 +38,7 @@ nfpms:
       - src: icons/appicon.png
         dst: /usr/share/icons/hicolor/512x512/apps/musicalc.png
       
-      # This creates the Start Menu entry automatically
-      - src: musicalc.desktop
+      # This creates the Start Menu entry automatically (uses /usr/bin path)
+      - src: musicalc-pkg.desktop
         dst: /usr/share/applications/musicalc.desktop
         type: config
