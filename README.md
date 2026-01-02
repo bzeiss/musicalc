@@ -4,7 +4,21 @@ A cross-platform music calculator application built with Go and Fyne. Provides r
 
 This project is heavily inspired by [MusicMath](https://dev.laurentcolson.com/musicmath.html), an excellent tool currently exclusive to the Apple ecosystem. This version aims to bring that same utility to all platforms, with a simpler look and feel. To support the original creator, I will not be providing pre-compiled macOS binaries; I encourage macOS users to purchase the original MusicMath instead. However, the source remains open for those who prefer to build it manually.
 
+## Disclaimer
+
+This application is provided for informational purposes only and is not guaranteed to be accurate. Calculations may contain errors due to software bugs, rounding, or floating-point limitations. Use this software entirely at your own risk; the author assumes no responsibility for any financial loss, data loss, or damages resulting from its use. Always manually verify critical results.
+
 ## Features
+
+### ⏱️ Timecode Calculator
+- Support for multiple frame rates: 23.976, 24, 25, 29.94, 29.97, 29.97 drop frame, 30, 50, 59.94, 60 fps
+- Precise NTSC frame rate handling with exact fractional values
+- Dual timecode input fields with real-time calculation
+- Add and subtract timecode operations
+- Frame count preservation when switching frame rates (H:M:S:F notation stays constant)
+- Compact display format showing timecode, frame count, and FPS
+- Unlimited calculation history with copy/paste support
+- Essential for video editing, post-production, and audio-for-video work
 
 ### 🎵 Tempo to Delay Calculator
 - Calculate delay times (ms) and modulation frequencies (Hz) for various note divisions
@@ -20,6 +34,15 @@ This project is heavily inspired by [MusicMath](https://dev.laurentcolson.com/mu
 - Dual MIDI convention display (C4=60 standard / C3=60 alternative)
 - Real-time frequency calculation with adjustable reference pitch
 - Ideal for tuning synthesizers, creating custom scales, and frequency analysis
+
+### 🎼 Frequency to Note Calculator
+- Convert any frequency to the closest musical note
+- Dual notation display: 100-cent and 50-cent systems
+- Shows pitch deviation in cents for fine-tuning accuracy
+- Quick-select buttons for common reference frequencies
+- Adjustable middle C convention (C3/C4)
+- Custom reference tuning support (default A4 = 440 Hz)
+- Perfect for analyzing recordings, tuning acoustic instruments, and spectrum analysis
 
 ### ⏱️ Sample Length Calculator
 - Bidirectional calculation: change any field and others update automatically
@@ -43,10 +66,8 @@ This project is heavily inspired by [MusicMath](https://dev.laurentcolson.com/mu
 
 ## TODOs
 
-- Timecode Calculator
 - Support for different temperaments in Note To Frequency Calculator
 - Tap tempo (maybe)
-- Frequency to note
 
 ## Documentation
 

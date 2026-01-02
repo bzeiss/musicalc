@@ -1,5 +1,40 @@
 # User Guide
 
+## Timecode
+
+1. **Select frame rate** from the dropdown (23.976, 24, 25, 29.97, 30, etc.)
+2. **Enter timecode values** in Hours:Minutes:Seconds:Frames format
+   - Fields start empty - just click and type
+   - Tab through fields for quick data entry
+   - Empty fields are treated as 0 in calculations
+
+3. **Perform calculations**:
+   - **Add**: Combines Timecode 1 and Timecode 2, moves result to Timecode 1
+   - **Subtract**: Subtracts Timecode 2 from Timecode 1, moves result to Timecode 1
+   - **Reset**: Clears all timecode fields and history
+   - **Clear History**: Clears only the history, keeps current timecode values
+
+4. **Switch frame rates**: Change the FPS dropdown to see:
+   - Same timecode notation (H:M:S:F stays constant)
+   - Recalculated frame count for the new frame rate
+   - History entry showing the conversion
+
+5. **View history**: All calculations and conversions are logged with frame counts and FPS
+   - Copy/paste history entries for documentation
+   - History persists until cleared or reset
+
+**Understanding the Display**:
+- Format: `00:34:35:04 (62254 frames @ 30)`
+- First part: Hours:Minutes:Seconds:Frames
+- Parentheses: Total frame count at current FPS
+- After @: Current frame rate
+
+**Example Use Cases**:
+- Add two video clips: `00:22:22:22 + 00:12:12:12 = 00:34:35:04 @ 30 fps`
+- Convert timecode between formats: `00:34:35:04 (62254f) @30 → 00:34:35:04 (51879f) @25`
+- Calculate exact frame counts for EDL or AAF workflows
+- Verify timecode calculations for post-production deliverables
+
 ## Tempo to Delay
 
 1. **Set your project tempo** in the BPM field at the top
@@ -13,14 +48,45 @@
 
 ## Note to Frequency
 
-1. **Set reference frequency** (default: 440 Hz for A3)
+1. **Set reference frequency** (default: 440 Hz)
 2. **Select reference note** if using non-standard tuning
-3. **Browse the frequency table** to find:
+3. **Choose middle C convention**: Switch between C3 and C4 naming conventions
+4. **Browse the frequency table** to find:
    - Exact frequencies for synthesizer tuning
    - MIDI note numbers for programming
    - Pitch relationships between notes
 
 **Example**: To tune a 808 kick to your track's key, find the root note frequency and adjust the kick's pitch to match
+
+## Frequency to Note
+
+1. **Enter frequency** in Hz (e.g., 440, 261.63, 1000)
+2. **View the closest note** with pitch deviation in cents
+3. **Choose notation system**:
+   - **100 Cents**: Standard music notation (100 cents = 1 semitone)
+   - **50 Cents**: Alternative notation used by some samplers (50 cents = 1 semitone)
+
+4. **Adjust settings** (optional):
+   - **Middle C**: Switch between C3 and C4 conventions
+   - **Reference**: Set custom tuning reference (default A4 = 440 Hz)
+
+5. **Use quick-select buttons** for common reference frequencies:
+   - 220 Hz (A3), 440 Hz (A4), 880 Hz (A5), etc.
+   - Instantly see the note and any pitch deviation
+
+**Understanding the Output**:
+- **100 Cents Notation**: Shows closest note and deviation (e.g., "F#3, -14 cents")
+  - Positive cents = sharp (higher than note)
+  - Negative cents = flat (lower than note)
+- **50 Cents Notation**: Alternative display (e.g., "F3, +86 cents")
+  - Same pitch, different reference point
+
+**Example Use Cases**:
+- Analyze a synth tone at 367 Hz → Result: F#3, -14 cents (or F3, +86 cents)
+- Find what note a resonant frequency represents
+- Tune acoustic instruments by analyzing recorded frequencies
+- Identify pitch of sampled sounds for proper key mapping
+- Match synth oscillators to specific frequencies
 
 ## Sample Length
 
