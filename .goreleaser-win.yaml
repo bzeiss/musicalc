@@ -1,0 +1,39 @@
+version: 2
+project_name: musicalc
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  # Windows AMD64 build using MinGW-w64
+  - id: windows-amd64
+    env:
+      - CGO_ENABLED=1
+      - CC=x86_64-w64-mingw32-gcc
+      - CXX=x86_64-w64-mingw32-g++
+    goos:
+      - windows
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -H=windowsgui
+    binary: musicalc_x64
+
+  # Windows ARM64 build using Zig
+  - id: windows-arm64
+    env:
+      - CGO_ENABLED=1
+      - CC=zig cc -target aarch64-windows-gnu
+      - CXX=zig c++ -target aarch64-windows-gnu
+    goos:
+      - windows
+    goarch:
+      - arm64
+    ldflags:
+      - -s -w -H=windowsgui
+    binary: musicalc_arm64
+
+# No archives or packages - just binaries
+archives:
+  - format: binary
