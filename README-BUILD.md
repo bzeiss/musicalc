@@ -72,18 +72,24 @@ or for a production build without the console:
    sudo apt-get update
    sudo apt-get install gcc libgl1-mesa-dev xorg-dev
    ```
+3. **Cross-compilation support (requires a more recent Ubuntu Server version for building)**
+   ```bash
+   sudo dpkg --add-architecture arm64
+   sudo apt-get update
+   sudo apt install gcc-aarch64-linux-gnu libasound2-dev:arm64 libgl1-mesa-dev:arm64 libx11-dev:arm64 libxrandr-dev:arm64 libxxf86vm-dev:arm64 libxi-dev:arm64 libxcursor-dev:arm64 libxinerama-dev:arm64
+   ```
 
-3. **Install Go dependencies**
+4. **Install Go dependencies**
    ```bash
    go mod download
    ```
 
-4. **Build the application**
+5. **Build the application**
    ```bash
    go build -ldflags="-s -w" -o musicalc
    ```
 
-5. **Run the application**
+6. **Run the application**
    ```bash
    ./musicalc
    ```
@@ -102,17 +108,33 @@ or for a production build without the console:
                     libXinerama-devel libXi-devel libXxf86vm-devel
    ```
 
-3. **Install Go dependencies**
+3. **Cross-compilation support**
+   ```bash
+   # Install ARM64 cross-compiler
+   sudo dnf install gcc-aarch64-linux-gnu
+   # Install ARM64 development libraries
+   sudo dnf install \
+     alsa-lib-devel.aarch64 \
+     mesa-libGL-devel.aarch64 \
+     libX11-devel.aarch64 \
+     libXrandr-devel.aarch64 \
+     libXxf86vm-devel.aarch64 \
+     libXi-devel.aarch64 \
+     libXcursor-devel.aarch64 \
+     libXinerama-devel.aarch64   
+   ```
+
+4. **Install Go dependencies**
    ```bash
    go mod download
    ```
 
-4. **Build the application**
+5. **Build the application**
    ```bash
    go build -ldflags="-s -w" -o musicalc
    ```
 
-5. **Run the application**
+6. **Run the application**
    ```bash
    ./musicalc
    ```
