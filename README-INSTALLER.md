@@ -56,17 +56,22 @@ GoReleaser automates the creation of `.deb`, `.rpm`, and `.tar.gz` packages for 
    go install github.com/goreleaser/goreleaser/v2@latest
    ```
 
-2. **Validate configuration**
+2. **Install Package Dependencies*
+   See [Build Instructions](README-BUILD.md).
+
+3. **Building packages with goreleaser**
+
+   For Linux AMD64:
+
    ```bash
-   goreleaser check
+   goreleaser check --config .goreleaser-linux-amd64.yaml
+   # for snapshot
+   goreleaser release --snapshot --clean --config .goreleaser-amd64.yaml
+   # for release
+   goreleaser release --clean --config .goreleaser-amd64.yaml --skip=publish
    ```
 
-3. **Build snapshot packages (for testing)**
-   ```bash
-   goreleaser release --snapshot --clean
-   ```
-
-   for ARM64:
+   For Linux ARM64:
 
    ```bash
    goreleaser check --config .goreleaser-arm64.yaml
@@ -84,14 +89,7 @@ GoReleaser automates the creation of `.deb`, `.rpm`, and `.tar.gz` packages for 
    git tag -a v0.1.0 -m "Release version 0.1.0"
    git push origin v0.1.0
    
-   # Build and publish release
-   goreleaser release --clean --skip=publish
-   ```
-
-   for ARM64:
-
-   ```bash
-   goreleaser release --clean --config .goreleaser-arm64.yaml
+   # Build and publish release using the gorelease release commands above
    ```
 
 **Generated artifacts**:
