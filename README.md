@@ -4,7 +4,7 @@ A cross-platform music calculator application built with Go and Fyne. Provides r
 
 This project is heavily inspired by [MusicMath](https://dev.laurentcolson.com/musicmath.html), an excellent tool currently exclusive to the Apple ecosystem. This version aims to bring that same utility to Windows and Linux, with a simpler look and feel. For macOS users looking for a polished commercial solution, MusicMath is highly recommended.
 
-<img width="664" height="781" alt="image" src="https://github.com/user-attachments/assets/26dd8ca2-a173-4f0e-91e0-1a62b615870f" />
+<img width="661" height="780" alt="image" src="https://github.com/user-attachments/assets/ac951f0d-6561-4f69-b6b8-c41b03d9a7fd" />
 
 ## Disclaimer
 
