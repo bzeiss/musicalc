@@ -6,38 +6,37 @@ before:
     - go mod tidy
 
 builds:
-  # Windows AMD64 build using MinGW-w64
   - id: windows-amd64
     env:
       - CGO_ENABLED=1
       - CC=x86_64-w64-mingw32-gcc
       - CXX=x86_64-w64-mingw32-g++
-    goos:
-      - windows
-    goarch:
-      - amd64
+    goos: [windows]
+    goarch: [amd64]
     ldflags:
       - -s -w -H=windowsgui
     binary: musicalc_x64
+    # This keeps the binary at the top level of the dist folder
+    no_unique_dist_dir: true
 
-  # Windows ARM64 build using Zig
   - id: windows-arm64
     env:
       - CGO_ENABLED=1
       - CC=zig cc -target aarch64-windows-gnu
       - CXX=zig c++ -target aarch64-windows-gnu
-    goos:
-      - windows
-    goarch:
-      - arm64
+    goos: [windows]
+    goarch: [arm64]
     ldflags:
       - -s -w -H=windowsgui
     binary: musicalc_arm64
+    no_unique_dist_dir: true
 
-# Output raw binaries only (no .zip or .tar.gz)
+# In v2, if you want just binaries, you can often omit the archives section.
+# If you still need it to ensure they are treated as "release artifacts":
 archives:
-  - id: musicalc-binaries
-    format: binary
+  - format: binary
+    # We use name_template to ensure the file name remains what we want
     name_template: "{{ .Binary }}"
-
-    
+    # Providing a dummy file prevents GoReleaser from adding default README/LICENSE
+    files:
+      - none*
