@@ -101,37 +101,37 @@ func FrequencyToNote(frequency float64, octaveOffset int) FrequencyResult {
 	noteIndex := nearestMIDI % 12
 	octave := (nearestMIDI / 12) - octaveOffset
 
-	result.Note100 = noteNames[noteIndex]
-	result.Note50 = noteNames[noteIndex]
-
-	// Calculate cent offset for 100-cent notation
-	// Cents = 1200 * log2(frequency / nearestNoteFrequency)
-	centOffset := 1200.0 * math.Log2(frequency/result.NearestFrequency)
-	result.Cents100 = int(math.Round(centOffset))
-
-	// For 50-cent notation, calculate total semitones including fractional part
+	// 100-cent notation: floor semitones, show 0-99 cents
+	// Calculate total semitones including fractional part
 	totalSemitones := semitonesFromA4 + 69.0 // Total semitones from C-2
 
-	// Use floor for negative numbers to match the tempo change logic
-	semitones50 := int(math.Floor(totalSemitones))
-	cents50Float := (totalSemitones - float64(semitones50)) * 100.0
-	result.Cents50 = int(math.Round(cents50Float))
+	// Use floor for semitones
+	semitones100 := int(math.Floor(totalSemitones))
+	cents100Float := (totalSemitones - float64(semitones100)) * 100.0
+	result.Cents100 = int(math.Round(cents100Float))
 
-	// Get note name for 50-cent notation (from the floored semitone)
-	noteIndex50 := semitones50 % 12
-	if noteIndex50 < 0 {
-		noteIndex50 += 12
+	// Get note name for 100-cent notation (from the floored semitone)
+	noteIndex100 := semitones100 % 12
+	if noteIndex100 < 0 {
+		noteIndex100 += 12
 	}
-	octave50 := (semitones50 / 12) - octaveOffset
+	octave100 := (semitones100 / 12) - octaveOffset
 
-	result.Note50 = noteNames[noteIndex50]
+	result.Note100 = noteNames[noteIndex100]
+
+	// 50-cent notation: round to nearest semitone, show ±50 cents
+	// Cents = 1200 * log2(frequency / nearestNoteFrequency)
+	centOffset := 1200.0 * math.Log2(frequency/result.NearestFrequency)
+	result.Cents50 = int(math.Round(centOffset))
+
+	result.Note50 = noteNames[noteIndex]
 
 	// Format note strings with octave
-	if octave >= -1 && octave <= 9 {
-		result.Note100 = result.Note100 + formatOctave(octave)
+	if octave100 >= -1 && octave100 <= 9 {
+		result.Note100 = result.Note100 + formatOctave(octave100)
 	}
-	if octave50 >= -1 && octave50 <= 9 {
-		result.Note50 = result.Note50 + formatOctave(octave50)
+	if octave >= -1 && octave <= 9 {
+		result.Note50 = result.Note50 + formatOctave(octave)
 	}
 
 	return result
