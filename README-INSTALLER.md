@@ -81,6 +81,16 @@ GoReleaser automates the creation of `.deb`, `.rpm`, and `.tar.gz` packages for 
    goreleaser release --clean --config .goreleaser-linux-arm64.yaml --skip=publish
    ```
 
+   For Windows AMD64/ARM64:
+   ```bash
+   goreleaser check --config .goreleaser-win.yaml
+   # for snapshot
+   goreleaser release --snapshot --clean --config .goreleaser-win.yaml
+   # for release
+   goreleaser release --clean --config .goreleaser-win.yaml --skip=publish
+   ```
+
+
    This creates packages in the `dist/` directory without requiring a Git tag.
 
 4. **Create a release (requires Git tag)**
