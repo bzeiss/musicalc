@@ -15,8 +15,6 @@ builds:
       - linux
     goarch:
       - arm64
-    env:
-      - CC=aarch64-linux-gnu-gcc      
     ldflags:
       - -s -w
 
