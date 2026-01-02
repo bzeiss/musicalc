@@ -31,12 +31,11 @@ builds:
     binary: musicalc_arm64
     no_unique_dist_dir: true
 
-# In v2, if you want just binaries, you can often omit the archives section.
-# If you still need it to ensure they are treated as "release artifacts":
 archives:
-  - format: binary
-    # We use name_template to ensure the file name remains what we want
+  - id: binary-only
+    # Change 'format' to 'formats' and use a list []
+    formats: [binary]
     name_template: "{{ .Binary }}"
-    # Providing a dummy file prevents GoReleaser from adding default README/LICENSE
+    # This prevents GoReleaser from adding default README/LICENSE files
     files:
       - none*
