@@ -36,4 +36,6 @@ builds:
 
 # No archives or packages - just binaries
 archives:
-  - format: binary
+  - id: default
+    format: binary
+    name_template: "{{ .Binary }}"
