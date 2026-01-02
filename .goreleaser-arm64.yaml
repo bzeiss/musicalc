@@ -6,16 +6,17 @@ before:
     - go mod tidy
 
 builds:
-  - id: linux-amd64
+  - id: linux-arm64
     env:
       - CGO_ENABLED=1
+      - CC=aarch64-linux-gnu-gcc
     goos:
       - linux
     goarch:
-      - amd64
+      - arm64
     ldflags:
       - -s -w
-  
+
 # This creates the .tar.gz bundle
 archives:
   - files:
