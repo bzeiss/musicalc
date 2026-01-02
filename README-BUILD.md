@@ -6,7 +6,7 @@
 
 1. **Clone the repository**
    ```powershell
-   git clone https://github.com/yourusername/musicalc.git
+   git clone https://github.com/bzeiss/musicalc.git
    cd musicalc
    ```
 
@@ -63,7 +63,7 @@ or for a production build without the console:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/musicalc.git
+   git clone https://github.com/bzeiss/musicalc.git
    cd musicalc
    ```
 
