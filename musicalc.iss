@@ -1,8 +1,8 @@
 ; Inno Setup Script for MusiCalc
-; Music Calculator Application
+; Music Calculator Application - Universal Architecture Version
 
 #define MyAppName "MusiCalc"
-#define MyAppVersion "0.8.0"
+#define MyAppVersion "0.8.1"
 #define MyAppPublisher "B. Zeiss"
 #define MyAppURL "https://github.com/bzeiss/musicalc"
 #define MyAppExeName "musicalc.exe"
@@ -18,8 +18,7 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
-; Uncomment the following line to run in non administrative install mode (install for current user only.)
-;PrivilegesRequired=lowest
+; PrivilegesRequired=lowest
 OutputDir=installer
 OutputBaseFilename=MusiCalc-Setup-{#MyAppVersion}
 SetupIconFile=icons\appicon.ico
@@ -27,9 +26,12 @@ Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 UninstallDisplayIcon={app}\{#MyAppExeName}
-; 64-bit application settings
-ArchitecturesAllowed=x64compatible
-ArchitecturesInstallIn64BitMode=x64compatible
+
+; --- Architecture Logic ---
+; Allow installation on x64 (including Arm64 emulation) and native Arm64
+ArchitecturesAllowed=x64compatible arm64
+; Enable 64-bit install mode (native Program Files) on both architectures
+ArchitecturesInstallIn64BitMode=x64compatible arm64
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -39,10 +41,15 @@ Name: "german"; MessagesFile: "compiler:Languages\German.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "musicalc.exe"; DestDir: "{app}"; Flags: ignoreversion
+; 1. Install AMD64 version on x64 systems
+Source: "dist\musicalc_x64.exe"; DestDir: "{app}"; DestName: "{#MyAppExeName}"; Check: IsX64; Flags: 64bit ignoreversion
+
+; 2. Install ARM64 version on ARM64 systems
+Source: "dist\musicalc_arm64.exe"; DestDir: "{app}"; DestName: "{#MyAppExeName}"; Check: IsArm64; Flags: 64bit ignoreversion
+
+; Common files
 Source: "icons\appicon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "icons\appicon.png"; DestDir: "{app}\icons"; Flags: ignoreversion
-; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\appicon.ico"
@@ -50,3 +57,15 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilen
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+
+[Code]
+// Helper functions for the [Files] section check
+function IsArm64: Boolean;
+begin
+  Result := (ProcessorArchitecture = paArm64);
+end;
+
+function IsX64: Boolean;
+begin
+  Result := (ProcessorArchitecture = paX64);
+end;
