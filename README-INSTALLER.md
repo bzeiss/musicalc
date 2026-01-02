@@ -47,7 +47,7 @@ The installer file (`MusiCalc-Setup-1.0.0.exe`) is a single executable that can 
 - Optional desktop shortcut
 - Uninstaller
 
-# Creating Linux Packages
+# Creating Linux Packages and Tarballs
 
 GoReleaser automates the creation of `.deb`, `.rpm`, and `.tar.gz` packages for distribution.
 
@@ -65,6 +65,13 @@ GoReleaser automates the creation of `.deb`, `.rpm`, and `.tar.gz` packages for 
    ```bash
    goreleaser release --snapshot --clean
    ```
+
+   for ARM64:
+
+   ```bash
+   goreleaser release --snapshot --clean --config .goreleaser-arm64.yaml
+   ```
+
    This creates packages in the `dist/` directory without requiring a Git tag.
 
 4. **Create a release (requires Git tag)**
@@ -75,6 +82,12 @@ GoReleaser automates the creation of `.deb`, `.rpm`, and `.tar.gz` packages for 
    
    # Build and publish release
    goreleaser release --clean --skip=publish
+   ```
+
+   for ARM64:
+
+   ```bash
+   goreleaser release --clean --config .goreleaser-arm64.yaml
    ```
 
 **Generated artifacts**:
