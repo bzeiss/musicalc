@@ -25,6 +25,10 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 	frequencyEntry.SetPlaceHolder("Enter frequency (Hz)")
 	frequencyEntry.SetText("440.00")
 
+	// Middle C convention selector
+	middleCSelect := widget.NewSelect([]string{"C3", "C4"}, nil)
+	middleCSelect.SetSelected("C3")
+
 	// Output labels
 	note100Label := widget.NewLabel("A4")
 	cents100Label := widget.NewLabel("0")
@@ -44,7 +48,13 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 
 		freq := logic.ParseFloat(frequencyEntry.Text)
 		if freq > 0 {
-			result := logic.FrequencyToNote(freq)
+			// Determine octave offset based on Middle C setting
+			octaveOffset := 1 // C4 convention (default)
+			if middleCSelect.Selected == "C3" {
+				octaveOffset = 2 // C3 convention
+			}
+
+			result := logic.FrequencyToNote(freq, octaveOffset)
 
 			note100Label.SetText(result.Note100)
 
@@ -65,29 +75,49 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 		}
 	}
 
-	// Wire up change handler
+	// Wire up change handlers
 	frequencyEntry.OnChanged = func(s string) {
+		calculateFromFrequency()
+	}
+
+	middleCSelect.OnChanged = func(s string) {
 		calculateFromFrequency()
 	}
 
 	// Quick-select buttons
 	c3Button := widget.NewButton("C3", func() {
-		freq := logic.GetC3Frequency()
+		octaveOffset := 1 // C4 convention (default)
+		if middleCSelect.Selected == "C3" {
+			octaveOffset = 2 // C3 convention
+		}
+		freq := logic.GetFrequencyForNote("C", 3, octaveOffset)
 		frequencyEntry.SetText(fmt.Sprintf("%.2f", freq))
 	})
 
 	a3Button := widget.NewButton("A3", func() {
-		freq := logic.GetA3Frequency()
+		octaveOffset := 1 // C4 convention (default)
+		if middleCSelect.Selected == "C3" {
+			octaveOffset = 2 // C3 convention
+		}
+		freq := logic.GetFrequencyForNote("A", 3, octaveOffset)
 		frequencyEntry.SetText(fmt.Sprintf("%.2f", freq))
 	})
 
 	c4Button := widget.NewButton("C4", func() {
-		freq := logic.GetC4Frequency()
+		octaveOffset := 1 // C4 convention (default)
+		if middleCSelect.Selected == "C3" {
+			octaveOffset = 2 // C3 convention
+		}
+		freq := logic.GetFrequencyForNote("C", 4, octaveOffset)
 		frequencyEntry.SetText(fmt.Sprintf("%.2f", freq))
 	})
 
 	a4Button := widget.NewButton("A4", func() {
-		freq := logic.GetA4Frequency()
+		octaveOffset := 1 // C4 convention (default)
+		if middleCSelect.Selected == "C3" {
+			octaveOffset = 2 // C3 convention
+		}
+		freq := logic.GetFrequencyForNote("A", 4, octaveOffset)
 		frequencyEntry.SetText(fmt.Sprintf("%.2f", freq))
 	})
 
@@ -106,6 +136,10 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 		container.NewGridWithColumns(2,
 			widget.NewLabel("Frequency (Hz):"),
 			frequencyEntry,
+		),
+		container.NewGridWithColumns(2,
+			widget.NewLabel("Middle C:"),
+			middleCSelect,
 		),
 		container.NewGridWithColumns(2,
 			widget.NewLabel("Quick-Select:"),

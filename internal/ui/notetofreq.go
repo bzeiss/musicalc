@@ -33,8 +33,8 @@ func NewDiapasonTab() fyne.CanvasObject {
 		}
 	}
 
-	// Calculate MIDI note number from note name
-	getMidiNote := func(noteName string) int {
+	// Calculate MIDI note number from note name based on octave convention
+	getMidiNote := func(noteName string, octaveOffset int) int {
 		if len(noteName) < 2 {
 			return 69 // Default to A4
 		}
@@ -59,8 +59,8 @@ func NewDiapasonTab() fyne.CanvasObject {
 				break
 			}
 		}
-		// Our table starts at C-2 = MIDI 0 (not C-1 = MIDI 0 as in standard)
-		return (octave+2)*12 + noteIndex
+		// Calculate MIDI using the octaveOffset from Middle C convention
+		return (octave+octaveOffset)*12 + noteIndex
 	}
 
 	// Reset function
@@ -84,6 +84,10 @@ func NewDiapasonTab() fyne.CanvasObject {
 		_ = refFreq.Set(s)
 	}
 
+	// Middle C convention selector
+	middleCSelect := widget.NewSelect([]string{"C3", "C4"}, nil)
+	middleCSelect.SetSelected("C3")
+
 	// Tuning selector
 	tuningSelect := widget.NewSelect([]string{"Equal Temperament"}, func(selected string) {
 		_ = tuning.Set(selected)
@@ -96,12 +100,21 @@ func NewDiapasonTab() fyne.CanvasObject {
 	// Cache for performance - avoid binding.Get() on every cell render
 	var cachedRefMidi int
 	var cachedRefHz float64
+	var cachedOctaveOffset int
 
 	// Update cache function
 	updateCache := func() {
 		refNoteVal, _ := refNote.Get()
 		refFreqVal, _ := refFreq.Get()
-		cachedRefMidi = getMidiNote(refNoteVal)
+
+		// Determine octave offset based on Middle C setting
+		if middleCSelect.Selected == "C3" {
+			cachedOctaveOffset = 2 // C3 convention
+		} else {
+			cachedOctaveOffset = 1 // C4 convention
+		}
+
+		cachedRefMidi = getMidiNote(refNoteVal, cachedOctaveOffset)
 		cachedRefHz = logic.ParseFloat(refFreqVal)
 	}
 
@@ -113,7 +126,9 @@ func NewDiapasonTab() fyne.CanvasObject {
 		resetToDefaults()
 		refNoteEntry.SetText("A3")
 		freqInput.SetText("440.00")
+		middleCSelect.SetSelected("C3")
 		tuningSelect.SetSelected("Equal Temperament")
+		updateCache()
 		if table != nil {
 			table.Refresh()
 		}
@@ -139,7 +154,7 @@ func NewDiapasonTab() fyne.CanvasObject {
 
 			switch id.Col {
 			case 0:
-				l.SetText(fmt.Sprintf("%s%d", noteNames[midiNote%12], (midiNote/12)-2))
+				l.SetText(fmt.Sprintf("%s%d", noteNames[midiNote%12], (midiNote/12)-cachedOctaveOffset))
 			case 1:
 				l.SetText(fmt.Sprintf("%.2f Hz", hz))
 			case 2:
@@ -200,6 +215,42 @@ func NewDiapasonTab() fyne.CanvasObject {
 	table.SetColumnWidth(2, 130)
 	table.SetColumnWidth(3, 130)
 
+	// Add listener for Middle C dropdown
+	middleCSelect.OnChanged = func(s string) {
+		// Adjust reference note octave when convention changes
+		currentRef := refNoteEntry.Text
+		if len(currentRef) >= 2 {
+			// Parse current note
+			var noteName string
+			var octave int
+
+			if len(currentRef) > 2 && currentRef[1] == '#' {
+				noteName = currentRef[:2]
+				fmt.Sscanf(currentRef[2:], "%d", &octave)
+			} else {
+				noteName = currentRef[:1]
+				fmt.Sscanf(currentRef[1:], "%d", &octave)
+			}
+
+			// Adjust octave based on convention change
+			if s == "C4" {
+				// Switching from C3 to C4: increase octave by 1
+				octave++
+			} else {
+				// Switching from C4 to C3: decrease octave by 1
+				octave--
+			}
+
+			// Update reference note
+			newRef := fmt.Sprintf("%s%d", noteName, octave)
+			refNoteEntry.SetText(newRef)
+			_ = refNote.Set(newRef)
+		}
+
+		updateCache()
+		table.Refresh()
+	}
+
 	// Add listeners to refresh table when inputs change
 	refFreq.AddListener(binding.NewDataListener(func() {
 		updateCache()
@@ -221,6 +272,10 @@ func NewDiapasonTab() fyne.CanvasObject {
 			container.NewGridWithColumns(2,
 				widget.NewLabel("Frequency:"),
 				freqInput,
+			),
+			container.NewGridWithColumns(2,
+				widget.NewLabel("Middle C:"),
+				middleCSelect,
 			),
 			container.NewGridWithColumns(2,
 				widget.NewLabel("Tuning:"),
