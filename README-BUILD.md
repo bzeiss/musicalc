@@ -72,108 +72,37 @@ or for a production build without the console:
    sudo apt-get update
    sudo apt-get install gcc libgl1-mesa-dev xorg-dev
    ```
-3. **Cross-compilation support (requires a more recent Ubuntu Server version for building)**
+3. **Linux ARM64 Cross-compilation support (requires a more recent Ubuntu Server version for building)**
    ```bash
    sudo dpkg --add-architecture arm64
    sudo apt-get update
    sudo apt install gcc-aarch64-linux-gnu libasound2-dev:arm64 libgl1-mesa-dev:arm64 libx11-dev:arm64 libxrandr-dev:arm64 libxxf86vm-dev:arm64 libxi-dev:arm64 libxcursor-dev:arm64 libxinerama-dev:arm64
    ```
 
-4. **Install Go dependencies**
+3. **Windows AMD64 Cross-compilation support (requires a more recent Ubuntu Server version for building)**
+   ```bash
+   sudo apt-get update
+   sudo apt install gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64
+   ```
+
+4. **Windows ARM64 Cross-compilation support (requires a more recent Ubuntu Server version for building)**
+   - Download Zig from: https://ziglang.org/download/
+   - Put zig somewere into your environment PATH
+   - test by calling "zig" and "zig c++"
+
+5. **Install Go dependencies**
    ```bash
    go mod download
    ```
 
-5. **Build the application**
+6. **Build the application**
    ```bash
    go build -ldflags="-s -w" -o musicalc
    ```
 
-6. **Run the application**
+7. **Run the application**
    ```bash
    ./musicalc
-   ```
-
-### Fedora
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/musicalc.git
-   cd musicalc
-   ```
-
-2. **Install dependencies**
-   ```bash
-   sudo dnf install gcc mesa-libGL-devel libXcursor-devel libXrandr-devel \
-                    libXinerama-devel libXi-devel libXxf86vm-devel
-   ```
-
-3. **Cross-compilation support**
-   ```bash
-   # Install ARM64 cross-compiler
-   sudo dnf install gcc-aarch64-linux-gnu
-   # Install ARM64 development libraries
-   sudo dnf install \
-     alsa-lib-devel.aarch64 \
-     mesa-libGL-devel.aarch64 \
-     libX11-devel.aarch64 \
-     libXrandr-devel.aarch64 \
-     libXxf86vm-devel.aarch64 \
-     libXi-devel.aarch64 \
-     libXcursor-devel.aarch64 \
-     libXinerama-devel.aarch64   
-   ```
-
-4. **Install Go dependencies**
-   ```bash
-   go mod download
-   ```
-
-5. **Build the application**
-   ```bash
-   go build -ldflags="-s -w" -o musicalc
-   ```
-
-6. **Run the application**
-   ```bash
-   ./musicalc
-   ```
-
-## macOS
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/musicalc.git
-   cd musicalc
-   ```
-
-2. **Install Xcode Command Line Tools** (if not already installed)
-   ```bash
-   xcode-select --install
-   ```
-
-3. **Install Go dependencies**
-   ```bash
-   go mod download
-   ```
-
-4. **Build the application**
-   ```bash
-   go build -ldflags="-s -w" -o musicalc
-   ```
-
-5. **Run the application**
-   ```bash
-   ./musicalc
-   ```
-
-   **Optional**: Create an app bundle
-   ```bash
-   # Install fyne command
-   go install fyne.io/fyne/v2/cmd/fyne@latest
-   
-   # Package as macOS app
-   fyne package -os darwin -icon Icon.png
    ```
 
 ## Requirements
