@@ -83,11 +83,11 @@ GoReleaser automates the creation of `.deb`, `.rpm`, and `.tar.gz` packages for 
 
    For Windows AMD64/ARM64:
    ```bash
-   goreleaser check --config .goreleaser-win.yaml
+   goreleaser check --config .goreleaser-cross-win.yaml
    # for snapshot
-   goreleaser release --snapshot --clean --config .goreleaser-win.yaml
+   goreleaser release --snapshot --clean --config .goreleaser-cross-win.yaml
    # for release
-   goreleaser release --clean --config .goreleaser-win.yaml --skip=publish
+   goreleaser release --clean --config .goreleaser-cross-win.yaml --skip=publish
    ```
 
 
