@@ -74,7 +74,7 @@ GoReleaser automates the creation of `.deb`, `.rpm`, and `.tar.gz` packages for 
    git push origin v0.1.0
    
    # Build and publish release
-   goreleaser release --clean
+   goreleaser release --clean --skip=publish
    ```
 
 **Generated artifacts**:
