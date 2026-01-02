@@ -34,8 +34,7 @@ builds:
       - -s -w -H=windowsgui
     binary: musicalc_arm64
 
-# No archives or packages - just binaries
+# Disable archives - output binaries only
 archives:
-  - id: default
-    format: binary
-    name_template: "{{ .Binary }}"
+  - id: skip-archive
+    rlcp: true
