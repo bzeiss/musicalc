@@ -3,7 +3,8 @@ project_name: musicalc
 
 before:
   hooks:
-    - go mod tidy
+    - git pull && git checkout -- go.mod && git fetch --tags --force
+#    - go mod tidy
 
 builds:
   - id: windows-amd64
