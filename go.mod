@@ -7,6 +7,7 @@ toolchain go1.24.5
 require (
 	fyne.io/fyne/v2 v2.7.1
 	github.com/faiface/beep v1.1.0
+	golang.org/x/mobile v0.0.0-20251209145715-2553ed8ce294
 )
 
 require (
@@ -40,8 +41,7 @@ require (
 	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/yuin/goldmark v1.7.8 // indirect
 	golang.org/x/exp v0.0.0-20190306152737-a1d7652674e8 // indirect
-	golang.org/x/image v0.24.0 // indirect
-	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a // indirect
+	golang.org/x/image v0.34.0 // indirect
 	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
