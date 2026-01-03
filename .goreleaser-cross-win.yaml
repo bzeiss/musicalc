@@ -4,7 +4,6 @@ project_name: musicalc
 before:
   hooks:
     - go mod tidy
-  clean: false
 
 builds:
   - id: windows-amd64
