@@ -84,9 +84,11 @@ func NewDiapasonTab() fyne.CanvasObject {
 		_ = refFreq.Set(s)
 	}
 
-	// Middle C convention selector
-	middleCSelect := widget.NewSelect([]string{"C3", "C4"}, nil)
-	middleCSelect.SetSelected("C3")
+	// Middle C convention selector (radio buttons)
+	middleCRadio := widget.NewRadioGroup([]string{"C3", "C4"}, nil)
+	middleCRadio.SetSelected("C3")
+	middleCRadio.Horizontal = true
+	middleCRadio.Required = true
 
 	// Track previous Middle C selection to avoid adjusting on unchanged selections
 	previousMiddleC := "C3"
@@ -111,7 +113,7 @@ func NewDiapasonTab() fyne.CanvasObject {
 		refFreqVal, _ := refFreq.Get()
 
 		// Determine octave offset based on Middle C setting
-		if middleCSelect.Selected == "C3" {
+		if middleCRadio.Selected == "C3" {
 			cachedOctaveOffset = 2 // C3 convention
 		} else {
 			cachedOctaveOffset = 1 // C4 convention
@@ -129,7 +131,7 @@ func NewDiapasonTab() fyne.CanvasObject {
 		resetToDefaults()
 		refNoteEntry.SetText("A3")
 		freqInput.SetText("440.00")
-		middleCSelect.SetSelected("C3")
+		middleCRadio.SetSelected("C3")
 		tuningSelect.SetSelected("Equal Temperament")
 		updateCache()
 		if table != nil {
@@ -218,8 +220,8 @@ func NewDiapasonTab() fyne.CanvasObject {
 	table.SetColumnWidth(2, 130)
 	table.SetColumnWidth(3, 130)
 
-	// Add listener for Middle C dropdown
-	middleCSelect.OnChanged = func(s string) {
+	// Add listener for Middle C radio buttons
+	middleCRadio.OnChanged = func(s string) {
 		// Only adjust reference if Middle C selection actually changed
 		if s == previousMiddleC {
 			return
@@ -286,7 +288,7 @@ func NewDiapasonTab() fyne.CanvasObject {
 			),
 			container.NewGridWithColumns(2,
 				widget.NewLabel("Middle C:"),
-				middleCSelect,
+				middleCRadio,
 			),
 			container.NewGridWithColumns(2,
 				widget.NewLabel("Tuning:"),

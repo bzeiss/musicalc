@@ -25,9 +25,11 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 	frequencyEntry.SetPlaceHolder("Enter frequency (Hz)")
 	frequencyEntry.SetText("440.00")
 
-	// Middle C convention selector
-	middleCSelect := widget.NewSelect([]string{"C3", "C4"}, nil)
-	middleCSelect.SetSelected("C3")
+	// Middle C convention selector (radio buttons)
+	middleCRadio := widget.NewRadioGroup([]string{"C3", "C4"}, nil)
+	middleCRadio.SetSelected("C3")
+	middleCRadio.Horizontal = true
+	middleCRadio.Required = true
 
 	// Output labels
 	note100Label := widget.NewLabel("A4")
@@ -50,7 +52,7 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 		if freq > 0 {
 			// Determine octave offset based on Middle C setting
 			octaveOffset := 1 // C4 convention (default)
-			if middleCSelect.Selected == "C3" {
+			if middleCRadio.Selected == "C3" {
 				octaveOffset = 2 // C3 convention
 			}
 
@@ -80,14 +82,14 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 		calculateFromFrequency()
 	}
 
-	middleCSelect.OnChanged = func(s string) {
+	middleCRadio.OnChanged = func(s string) {
 		calculateFromFrequency()
 	}
 
 	// Quick-select buttons
 	c3Button := widget.NewButton("C3", func() {
 		octaveOffset := 1 // C4 convention (default)
-		if middleCSelect.Selected == "C3" {
+		if middleCRadio.Selected == "C3" {
 			octaveOffset = 2 // C3 convention
 		}
 		freq := logic.GetFrequencyForNote("C", 3, octaveOffset)
@@ -96,7 +98,7 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 
 	a3Button := widget.NewButton("A3", func() {
 		octaveOffset := 1 // C4 convention (default)
-		if middleCSelect.Selected == "C3" {
+		if middleCRadio.Selected == "C3" {
 			octaveOffset = 2 // C3 convention
 		}
 		freq := logic.GetFrequencyForNote("A", 3, octaveOffset)
@@ -105,7 +107,7 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 
 	c4Button := widget.NewButton("C4", func() {
 		octaveOffset := 1 // C4 convention (default)
-		if middleCSelect.Selected == "C3" {
+		if middleCRadio.Selected == "C3" {
 			octaveOffset = 2 // C3 convention
 		}
 		freq := logic.GetFrequencyForNote("C", 4, octaveOffset)
@@ -114,7 +116,7 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 
 	a4Button := widget.NewButton("A4", func() {
 		octaveOffset := 1 // C4 convention (default)
-		if middleCSelect.Selected == "C3" {
+		if middleCRadio.Selected == "C3" {
 			octaveOffset = 2 // C3 convention
 		}
 		freq := logic.GetFrequencyForNote("A", 4, octaveOffset)
@@ -139,7 +141,7 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 		),
 		container.NewGridWithColumns(2,
 			widget.NewLabel("Middle C:"),
-			middleCSelect,
+			middleCRadio,
 		),
 		container.NewGridWithColumns(2,
 			widget.NewLabel("Quick-Select:"),
