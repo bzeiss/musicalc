@@ -75,6 +75,7 @@ This application is provided for informational purposes only and is not guarante
 
 - Support for different temperaments in Note To Frequency Calculator
 - Tap tempo (maybe)
+- UI polish for the Android layout
 
 ## Documentation
 
