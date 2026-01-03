@@ -215,10 +215,10 @@ func NewDiapasonTab() fyne.CanvasObject {
 	// Hide row header column
 	table.ShowHeaderColumn = false
 
-	table.SetColumnWidth(0, 130)
-	table.SetColumnWidth(1, 150)
-	table.SetColumnWidth(2, 130)
-	table.SetColumnWidth(3, 130)
+	table.SetColumnWidth(0, 100)
+	table.SetColumnWidth(1, 120)
+	table.SetColumnWidth(2, 100)
+	table.SetColumnWidth(3, 100)
 
 	// Add listener for Middle C radio buttons
 	middleCRadio.OnChanged = func(s string) {

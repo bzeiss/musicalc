@@ -12,7 +12,8 @@ func main() {
 	myApp := app.NewWithID("com.musicalc")
 
 	window := myApp.NewWindow("MusiCalc")
-	window.Resize(fyne.NewSize(660, 750))
+	window.Resize(fyne.NewSize(450, 650))
+	window.SetFixedSize(true)
 
 	// Load and set application icon (if available)
 	// Icon should be at: icons/appicon.png

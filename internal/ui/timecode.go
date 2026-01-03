@@ -48,8 +48,11 @@ func NewTimecodeTab() fyne.CanvasObject {
 	// History display (multi-line entry for copy/paste support)
 	historyText := widget.NewMultiLineEntry()
 	historyText.Wrapping = fyne.TextWrapWord
-	// Keep enabled for better contrast but make read-only via placeholder
+	historyText.TextStyle.Monospace = true // Monospace for better alignment
 	historyList := []string{}
+
+	// Create scroll container early so operations can auto-scroll to bottom
+	historyScroll := container.NewVScroll(historyText)
 
 	// Flag to prevent circular updates
 	updating := false
@@ -181,10 +184,12 @@ func NewTimecodeTab() fyne.CanvasObject {
 				oldFpsLabel := strings.Split(previousFPS, " ")[0]
 				newFpsLabel := strings.Split(s, " ")[0]
 
-				conversionEntry := fmt.Sprintf("%s (%df) @%s → %s (%df) @%s",
+				conversionEntry := fmt.Sprintf("  %s (%df) @%s\n= %s (%df) @%s",
 					oldTC, oldFrames, oldFpsLabel, newTC, newFrames, newFpsLabel)
 				historyList = append(historyList, conversionEntry)
-				historyText.SetText(strings.Join(historyList, "\n"))
+				historyText.SetText(strings.Join(historyList, "\n\n"))
+				historyText.Refresh()
+				historyScroll.ScrollToBottom()
 
 				// Timecode H:M:S:F values don't change, only recalculate display with new FPS
 				// No need to update entry fields since H:M:S:F stay the same
@@ -262,10 +267,12 @@ func NewTimecodeTab() fyne.CanvasObject {
 		frames2 := logic.TimecodeToFrames(h2, m2, s2, f2, format)
 
 		fpsLabel := strings.Split(fpsSelect.Selected, " ")[0]
-		historyEntry := fmt.Sprintf("%s (%df) + %s (%df) = %s (%df) @%s",
+		historyEntry := fmt.Sprintf("  %s (%df)\n+ %s (%df)\n= %s (%df) @%s",
 			tc1, frames1, tc2, frames2, result.Timecode, result.TotalFrames, fpsLabel)
 		historyList = append(historyList, historyEntry)
-		historyText.SetText(strings.Join(historyList, "\n"))
+		historyText.SetText(strings.Join(historyList, "\n\n"))
+		historyText.Refresh()
+		historyScroll.ScrollToBottom()
 
 		// Update first timecode with result and reset second timecode
 		updating = true
@@ -349,10 +356,12 @@ func NewTimecodeTab() fyne.CanvasObject {
 		frames2 := logic.TimecodeToFrames(h2, m2, s2, f2, format)
 
 		fpsLabel := strings.Split(fpsSelect.Selected, " ")[0]
-		historyEntry := fmt.Sprintf("%s (%df) - %s (%df) = %s (%df) @%s",
+		historyEntry := fmt.Sprintf("  %s (%df)\n- %s (%df)\n= %s (%df) @%s",
 			tc1, frames1, tc2, frames2, result.Timecode, result.TotalFrames, fpsLabel)
 		historyList = append(historyList, historyEntry)
-		historyText.SetText(strings.Join(historyList, "\n"))
+		historyText.SetText(strings.Join(historyList, "\n\n"))
+		historyText.Refresh()
+		historyScroll.ScrollToBottom()
 
 		// Update first timecode with result and reset second timecode
 		updating = true
@@ -396,9 +405,6 @@ func NewTimecodeTab() fyne.CanvasObject {
 	// Initialize
 	calculateTimecode1()
 	calculateTimecode2()
-
-	// Create scroll container for history
-	historyScroll := container.NewVScroll(historyText)
 
 	return container.NewBorder(
 		container.NewVBox(

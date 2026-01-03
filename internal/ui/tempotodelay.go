@@ -98,9 +98,9 @@ func NewTempoTab() fyne.CanvasObject {
 	// Hide row header column
 	table.ShowHeaderColumn = false
 
-	table.SetColumnWidth(0, 150)
-	table.SetColumnWidth(1, 190)
-	table.SetColumnWidth(2, 190)
+	table.SetColumnWidth(0, 140)
+	table.SetColumnWidth(1, 140)
+	table.SetColumnWidth(2, 140)
 
 	bpm.AddListener(binding.NewDataListener(func() { table.Refresh() }))
 
