@@ -10,6 +10,7 @@ This project is heavily inspired by [MusicMath](https://dev.laurentcolson.com/mu
     <td><img width="446" height="677" alt="image" src="https://github.com/user-attachments/assets/d50078af-9464-4890-962c-2da1d016dd0e" /></td>
   </tr>
 </table>
+
 ## Disclaimer
 
 This application is provided for informational purposes only and is not guaranteed to be accurate. Calculations may contain errors due to software bugs, rounding, or floating-point limitations. Use this software entirely at your own risk; the author assumes no responsibility for any financial loss, data loss, or damages resulting from its use. Always manually verify critical results.
