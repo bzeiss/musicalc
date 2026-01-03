@@ -88,6 +88,9 @@ func NewDiapasonTab() fyne.CanvasObject {
 	middleCSelect := widget.NewSelect([]string{"C3", "C4"}, nil)
 	middleCSelect.SetSelected("C3")
 
+	// Track previous Middle C selection to avoid adjusting on unchanged selections
+	previousMiddleC := "C3"
+
 	// Tuning selector
 	tuningSelect := widget.NewSelect([]string{"Equal Temperament"}, func(selected string) {
 		_ = tuning.Set(selected)
@@ -217,6 +220,11 @@ func NewDiapasonTab() fyne.CanvasObject {
 
 	// Add listener for Middle C dropdown
 	middleCSelect.OnChanged = func(s string) {
+		// Only adjust reference if Middle C selection actually changed
+		if s == previousMiddleC {
+			return
+		}
+
 		// Adjust reference note octave when convention changes
 		currentRef := refNoteEntry.Text
 		if len(currentRef) >= 2 {
@@ -246,6 +254,9 @@ func NewDiapasonTab() fyne.CanvasObject {
 			refNoteEntry.SetText(newRef)
 			_ = refNote.Set(newRef)
 		}
+
+		// Update previous selection tracker
+		previousMiddleC = s
 
 		updateCache()
 		table.Refresh()
