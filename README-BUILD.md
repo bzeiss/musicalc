@@ -47,7 +47,7 @@
    ```powershell
    go build -ldflags="-s -w" -o musicalc.exe
    ```
-or for a production build without the console:
+   or for a production build without the console:
    ```powershell
    go build -ldflags="-s -w -H=windowsgui" -o musicalc.exe
    ```
@@ -59,7 +59,7 @@ or for a production build without the console:
 
 ## Linux
 
-### Debian/Ubuntu
+### Ubuntu
 
 1. **Clone the repository**
    ```bash
@@ -70,7 +70,7 @@ or for a production build without the console:
 2. **Install dependencies**
    ```bash
    sudo apt-get update
-   sudo apt-get install gcc libgl1-mesa-dev xorg-dev
+   sudo apt-get install gcc libgl1-mesa-dev xorg-dev libasound2-dev pkg-config
    ```
 3. **Linux ARM64 Cross-compilation support (requires a more recent Ubuntu Server version for building)**
    ```bash
