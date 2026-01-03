@@ -47,7 +47,7 @@
    ```powershell
    go build -ldflags="-s -w" -o musicalc.exe
    ```
-or for a production build without the console:
+   or for a production build without the console:
    ```powershell
    go build -ldflags="-s -w -H=windowsgui" -o musicalc.exe
    ```
