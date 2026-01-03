@@ -408,7 +408,8 @@ func NewTimecodeTab() fyne.CanvasObject {
 
 	return container.NewBorder(
 		container.NewVBox(
-			widget.NewLabel("Timecode 1:"),
+			widget.NewLabelWithStyle("Timecode 1", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+			widget.NewSeparator(),
 			container.NewGridWithColumns(4,
 				widget.NewLabel("Hours:"),
 				hours1Entry,
@@ -422,8 +423,8 @@ func NewTimecodeTab() fyne.CanvasObject {
 				frames1Entry,
 			),
 			timecode1Label,
+			widget.NewLabelWithStyle("Timecode 2", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 			widget.NewSeparator(),
-			widget.NewLabel("Timecode 2:"),
 			container.NewGridWithColumns(4,
 				widget.NewLabel("Hours:"),
 				hours2Entry,
@@ -442,7 +443,6 @@ func NewTimecodeTab() fyne.CanvasObject {
 				widget.NewLabel("FPS Format:"),
 				fpsSelect,
 			),
-			widget.NewSeparator(),
 			container.NewGridWithColumns(4,
 				addButton,
 				subtractButton,
@@ -450,7 +450,6 @@ func NewTimecodeTab() fyne.CanvasObject {
 				clearHistoryButton,
 			),
 			widget.NewSeparator(),
-			widget.NewLabel("History:"),
 		), // top
 		nil,           // bottom
 		nil,           // left
