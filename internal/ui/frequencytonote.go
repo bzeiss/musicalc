@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"musicalc/internal/audio"
 	"musicalc/internal/logic"
+	"musicalc/internal/ui/widgets"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -13,7 +14,7 @@ import (
 
 func NewFrequencyToNoteTab() fyne.CanvasObject {
 	// Input field
-	frequencyEntry := widget.NewEntry()
+	frequencyEntry := widgets.NewNumericEntry()
 	frequencyEntry.SetPlaceHolder("Frequency")
 	frequencyEntry.SetText("440")
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"musicalc/internal/logic"
 	sclres "musicalc/internal/logic/scl"
+	"musicalc/internal/ui/widgets"
 	"sort"
 
 	"fyne.io/fyne/v2"
@@ -63,7 +64,7 @@ func NewDiapasonTab() fyne.CanvasObject {
 	}
 
 	// Frequency input
-	freqInput := widget.NewEntry()
+	freqInput := widgets.NewNumericEntry()
 	freqInput.SetText("440")
 	freqInput.PlaceHolder = "Frequency"
 	freqInput.OnChanged = func(s string) {

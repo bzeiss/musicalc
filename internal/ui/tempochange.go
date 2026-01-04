@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"musicalc/internal/logic"
+	"musicalc/internal/ui/widgets"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -17,22 +18,22 @@ func NewTempoChangeTab() fyne.CanvasObject {
 	_ = originalTempo.Set("120")
 
 	// Input/output fields
-	originalTempoEntry := widget.NewEntry()
+	originalTempoEntry := widgets.NewNumericEntry()
 	originalTempoEntry.SetText("120")
 
-	newTempoEntry := widget.NewEntry()
+	newTempoEntry := widgets.NewNumericEntry()
 	newTempoEntry.SetText("100")
 
-	timeStretchEntry := widget.NewEntry()
+	timeStretchEntry := widgets.NewNumericEntry()
 	timeStretchEntry.PlaceHolder = "Time Stretching %"
 
 	// Read-only output fields (using Labels)
 	tempoDeltaLabel := widget.NewLabel("")
 
 	// Editable transpose inputs (standard notation)
-	semitonesEntry := widget.NewEntry()
+	semitonesEntry := widgets.NewNumericEntry()
 	semitonesEntry.PlaceHolder = "Transpose Semis"
-	centsEntry := widget.NewEntry()
+	centsEntry := widgets.NewNumericEntry()
 	centsEntry.PlaceHolder = "Transpose Cents"
 
 	// Read-only 50-cent notation outputs

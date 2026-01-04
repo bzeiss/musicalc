@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"musicalc/internal/logic"
+	"musicalc/internal/ui/widgets"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -13,7 +14,7 @@ import (
 func NewTempoTab() fyne.CanvasObject {
 	bpm := binding.NewString()
 	_ = bpm.Set("120")
-	input := widget.NewEntry()
+	input := widgets.NewNumericEntry()
 	input.SetText("120")
 	input.PlaceHolder = "Tempo"
 	input.OnChanged = func(s string) {

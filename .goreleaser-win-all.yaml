@@ -7,11 +7,13 @@ before:
 #    - go mod tidy
 
 builds:
-  - id: windows-amd64
+  - id: win-amd64
     env:
       - CGO_ENABLED=1
       - CC=x86_64-w64-mingw32-gcc
       - CXX=x86_64-w64-mingw32-g++
+      - CGO_CFLAGS="-O3 -flto=auto -march=x86-64-v3 -m64"
+      - CGO_LDFLAGS="-O3 -flto=auto"
     goos: [windows]
     goarch: [amd64]
     ldflags:
@@ -20,11 +22,13 @@ builds:
     # This keeps the binary at the top level of the dist folder
     no_unique_dist_dir: true
 
-  - id: windows-arm64
+  - id: win-arm64
     env:
       - CGO_ENABLED=1
       - CC=zig cc -target aarch64-windows-gnu
       - CXX=zig c++ -target aarch64-windows-gnu
+      - CGO_CFLAGS="-O3 -mcpu=oryon_1 -fomit-frame-pointer"
+      - CGO_LDFLAGS="-O3"
     goos: [windows]
     goarch: [arm64]
     ldflags:

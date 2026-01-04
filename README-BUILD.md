@@ -45,6 +45,9 @@
 
 7. **Build the application**
    ```powershell
+   $env:CGO_FLAGS="-O3 -flto=auto -march=x86-64-v3"
+   $env:CGO_LDFLAGS="-O3 -flto=auto"
+   $env:CGO_ENABLED=1
    go build -ldflags="-s -w" -o musicalc.exe
    ```
    or for a production build without the console:
@@ -95,18 +98,84 @@
    go mod download
    ```
 
-6. **Build the application**
+6. **Build the application for Linux AMD64**
    ```bash
-   go build -ldflags="-s -w" -o musicalc
+   export CGO_CFLAGS="-O3 -flto=auto -march=x86-64-v3"
+   export CGO_LDFLAGS="-O3 -flto=auto"
+   export CGO_ENABLED=1
+   export GOOS=linux
+   export GOARCH=amd64
+   go build -ldflags="-s -w" -o musicalc_linux_amd64
    ```
 
-7. **Run the application**
+7. **Build the application for Linux ARM64**
    ```bash
-   ./musicalc
+   export CGO_CFLAGS="-O3 -flto=auto -march=armv8.4-a+crc+crypto -fomit-frame-pointer"
+   export CGO_LDFLAGS="-O3 -flto=auto -Wl,--gc-sections"
+   export CGO_ENABLED=1
+   export CC=aarch64-linux-gnu-gcc
+   export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig
+   export GOOS=linux
+   export GOARCH=arm64
+   go build -ldflags="-s -w" -o musicalc_linux_arm64
+   ```
+
+8. **Build the application for Windows AMD64**
+   ```bash
+   export CGO_CFLAGS="-O3 -flto=auto -march=x86-64-v3 -m64"
+   export CGO_LDFLAGS="-O3 -flto=auto"
+   export CGO_ENABLED=1
+   export CC=x86_64-w64-mingw32-gcc
+   export CXX=x86_64-w64-mingw32-g++
+   export GOOS=windows
+   export GOARCH=amd64
+   go build -ldflags="-s -w" -o musicalc_win_amd64
+   ```
+
+9. **Build the application for Windows ARM64**
+   ```bash
+   export CGO_CFLAGS="-O3 -mcpu=oryon_1 -fomit-frame-pointer"
+   export CGO_LDFLAGS="-O3"
+   export CGO_ENABLED=1
+   export CC="zig cc -target aarch64-windows-gnu"
+   export CXX="zig c++ -target aarch64-windows-gnu"
+   export GOOS=windows
+   export GOARCH=arm64
+   go build -ldflags="-s -w" -o musicalc_win_arm64
+   ```
+
+10. **Build the application for Android ARM64**
+   ```bash
+   export ANDROID_NDK_HOME=/path/to/your/android-ndk
+   export ANDROID_HOME=/path/to/your/android-sdk
+   export ANDROID_SDK_ROOT=$ANDROID_HOME
+   export PATH=$PATH:${ANDROID_HOME}/cmdline-tools/latest/bin
+   export CGO_ENABLED=1
+   export CGO_CFLAGS="-O3 -flto=auto -march=armv8-a+crc+crypto"
+   export CGO_LDFLAGS="-O3,-flto=auto,-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384"
+   export GOFLAGS="-ldflags=-s -w"
+   fyne package --os android/arm64 --id com.github.bzeiss --release -icon icons/appicon.png
+   mv musicalc.apk dist/ && cd dist && zipalign -v -P 16 4 musicalc.apk musicalc-aligned.apk
+   zipalign -c -v -P 16 4 musicalc-aligned.apk # optional, just a verification
+   unzip -p musicalc-aligned.apk lib/arm64-v8a/libmusicalc.so > libmusicalc.so && objdump -p libmusicalc.so | grep LOAD && rm libmusicalc.so #check alignment, should be 2**14
+   ```
+
+   For the Android SDK and NDK, you can use the Android Studio SDK Manager to install them.
+   ```bash
+   sdkmanager --licenses # accept all licenses
+   sdkmanager "platform-tools" "build-tools;36.1.0" "platforms;android-36" # choose the most recent version
+   ```
+
+11. **Run the application**
+   ```bash
+   ./musicalc_xxx
    ```
 
 ## Requirements
 
 - Go 1.24.5 or later
+- GCC/MinGW (for CGO support on Windows)
+- Fyne v2.7.1
+
 - GCC/MinGW (for CGO support on Windows)
 - Fyne v2.7.1

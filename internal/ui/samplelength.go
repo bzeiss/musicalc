@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"musicalc/internal/logic"
+	"musicalc/internal/ui/widgets"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -39,15 +40,15 @@ func NewSampleLengthTab() fyne.CanvasObject {
 	sampleRateSelect.PlaceHolder = "Sample Rate"
 
 	// Beats input
-	beatsInput := widget.NewEntry()
+	beatsInput := widgets.NewNumericEntry()
 	beatsInput.PlaceHolder = "Beats"
 
 	// Bidirectional input/output fields
-	samplesEntry := widget.NewEntry()
+	samplesEntry := widgets.NewNumericEntry()
 	samplesEntry.PlaceHolder = "Length in samples"
-	msEntry := widget.NewEntry()
+	msEntry := widgets.NewNumericEntry()
 	msEntry.PlaceHolder = "Length in ms"
-	tempoEntry := widget.NewEntry()
+	tempoEntry := widgets.NewNumericEntry()
 	tempoEntry.PlaceHolder = "Tempo"
 
 	// Flag to prevent circular updates
