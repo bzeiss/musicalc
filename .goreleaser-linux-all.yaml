@@ -10,8 +10,8 @@ builds:
   - id: linux-amd64
     env:
       - CGO_ENABLED=1
-      - CGO_CFLAGS="-O3 -flto=auto -march=x86-64-v3"
-      - CGO_LDFLAGS="-O3 -flto=auto"
+      - CGO_CFLAGS=-O3 -flto=auto -march=x86-64-v3
+      - CGO_LDFLAGS=-O3 -flto=auto
     goos:
       - linux
     goarch:
@@ -24,8 +24,8 @@ builds:
       - CGO_ENABLED=1
       - CC=aarch64-linux-gnu-gcc
       - PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig
-      - CGO_CFLAGS="-O3 -flto=auto -march=armv8.4-a+crc+crypto -fomit-frame-pointer"
-      - CGO_LDFLAGS="-O3 -flto=auto -Wl,--gc-sections"
+      - CGO_CFLAGS=-O3 -flto=auto -march=armv8.4-a+crc+crypto -fomit-frame-pointer
+      - CGO_LDFLAGS=-O3 -flto=auto -Wl,--gc-sections
     goos:
       - linux
     goarch:
