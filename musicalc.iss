@@ -2,7 +2,7 @@
 ; Music Calculator Application - Universal Architecture Version
 
 #define MyAppName "MusiCalc"
-#define MyAppVersion "0.8.2"
+#define MyAppVersion "0.8.3"
 #define MyAppPublisher "B. Zeiss"
 #define MyAppURL "https://github.com/bzeiss/musicalc"
 #define MyAppExeName "musicalc.exe"
@@ -20,7 +20,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
 ; PrivilegesRequired=lowest
 OutputDir=installer
-OutputBaseFilename=MusiCalc-Setup-{#MyAppVersion}
+OutputBaseFilename=musicalc-setup-{#MyAppVersion}
 SetupIconFile=icons\appicon.ico
 Compression=lzma
 SolidCompression=yes
