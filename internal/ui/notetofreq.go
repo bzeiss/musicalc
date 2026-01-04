@@ -14,7 +14,7 @@ import (
 func NewDiapasonTab() fyne.CanvasObject {
 	// Reference frequency binding
 	refFreq := binding.NewString()
-	_ = refFreq.Set("440.00")
+	_ = refFreq.Set("440")
 
 	// Reference note binding (default A3 = MIDI 57)
 	refNote := binding.NewString()
@@ -66,7 +66,7 @@ func NewDiapasonTab() fyne.CanvasObject {
 	// Reset function
 	resetToDefaults := func() {
 		_ = refNote.Set("A3")
-		_ = refFreq.Set("440.00")
+		_ = refFreq.Set("440")
 		_ = tuning.Set("Equal Temperament")
 	}
 
@@ -79,7 +79,8 @@ func NewDiapasonTab() fyne.CanvasObject {
 
 	// Frequency input
 	freqInput := widget.NewEntry()
-	freqInput.SetText("440.00")
+	freqInput.SetText("440")
+	freqInput.PlaceHolder = "Frequency"
 	freqInput.OnChanged = func(s string) {
 		_ = refFreq.Set(s)
 	}
@@ -127,10 +128,10 @@ func NewDiapasonTab() fyne.CanvasObject {
 	updateCache()
 
 	// Reset button
-	resetBtn := widget.NewButton("↻", func() {
+	resetBtn := widget.NewButton("↻ Reset", func() {
 		resetToDefaults()
 		refNoteEntry.SetText("A3")
-		freqInput.SetText("440.00")
+		freqInput.SetText("440")
 		middleCRadio.SetSelected("C3")
 		tuningSelect.SetSelected("Equal Temperament")
 		updateCache()
@@ -215,10 +216,9 @@ func NewDiapasonTab() fyne.CanvasObject {
 	// Hide row header column
 	table.ShowHeaderColumn = false
 
-	table.SetColumnWidth(0, 100)
-	table.SetColumnWidth(1, 120)
-	table.SetColumnWidth(2, 100)
-	table.SetColumnWidth(3, 100)
+	// Wrap table in responsive container with proportional column widths
+	// Proportions: Note (23%), Frequency (28%), Cents (23%), MIDI (26%)
+	responsiveTableWidget := NewResponsiveTable(table, []float32{0.23, 0.28, 0.23, 0.26}, 400, 20)
 
 	// Add listener for Middle C radio buttons
 	middleCRadio.OnChanged = func(s string) {
@@ -278,29 +278,27 @@ func NewDiapasonTab() fyne.CanvasObject {
 	// Build UI layout
 	return container.NewBorder(
 		container.NewVBox(
+			widget.NewLabelWithStyle("Note to Frequency", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+			widget.NewSeparator(),
 			container.NewGridWithColumns(2,
-				widget.NewLabel("Reference:"),
+				widget.NewLabel("Reference"),
 				refNoteEntry,
 			),
 			container.NewGridWithColumns(2,
-				widget.NewLabel("Frequency:"),
+				widget.NewLabel("Frequency"),
 				freqInput,
 			),
 			container.NewGridWithColumns(2,
-				widget.NewLabel("Middle C:"),
+				widget.NewLabel("Middle C"),
 				middleCRadio,
 			),
 			container.NewGridWithColumns(2,
-				widget.NewLabel("Tuning:"),
 				tuningSelect,
-			),
-			container.NewGridWithColumns(2,
-				widget.NewLabel("Reset:"),
 				resetBtn,
 			),
 			widget.NewSeparator(),
 		),
 		nil, nil, nil,
-		table,
+		responsiveTableWidget,
 	)
 }
