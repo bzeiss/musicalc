@@ -148,7 +148,7 @@ func NewDiapasonTab() fyne.CanvasObject {
 	updateCache()
 
 	// Reset button
-	resetBtn := widget.NewButton("↻ Reset", func() {
+	resetBtn := widget.NewButton("🔄 Reset", func() {
 		resetToDefaults()
 		refNoteEntry.SetText("A3")
 		freqInput.SetText("440")

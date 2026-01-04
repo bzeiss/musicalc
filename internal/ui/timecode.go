@@ -251,7 +251,7 @@ func NewTimecodeTab() fyne.CanvasObject {
 	timecode2Entry.OnOperationKey = handleOperationKey
 
 	// Reset operation
-	resetButton := widget.NewButton("↻ Reset", func() {
+	resetButton := widget.NewButton("🔄 Reset", func() {
 		updating = true
 		timecode1Entry.SetText("")
 		timecode2Entry.SetText("")

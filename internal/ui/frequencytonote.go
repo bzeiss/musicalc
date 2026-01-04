@@ -140,7 +140,7 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 	})
 
 	// Reset button
-	resetButton := widget.NewButton("↻ Reset", func() {
+	resetButton := widget.NewButton("🔄 Reset", func() {
 		frequencyEntry.SetText("440")
 		middleCRadio.SetSelected("C3")
 	})
