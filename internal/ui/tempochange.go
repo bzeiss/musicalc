@@ -24,7 +24,7 @@ func NewTempoChangeTab() fyne.CanvasObject {
 	newTempoEntry.SetText("100")
 
 	timeStretchEntry := widget.NewEntry()
-	timeStretchEntry.PlaceHolder = "Time stretching %"
+	timeStretchEntry.PlaceHolder = "Time Stretching %"
 
 	// Read-only output fields (using Labels)
 	tempoDeltaLabel := widget.NewLabel("")
@@ -298,10 +298,10 @@ func NewTempoChangeTab() fyne.CanvasObject {
 	calcFromNewTempo()
 
 	return container.NewVBox(
-		widget.NewLabelWithStyle("Tempo Change / Timestretching", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		widget.NewLabelWithStyle("Tempo Change / Time Stretching", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		widget.NewSeparator(),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Tempo"),
+			widget.NewLabel("Original Tempo"),
 			originalTempoEntry,
 		),
 		container.NewGridWithColumns(2,
