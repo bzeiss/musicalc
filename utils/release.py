@@ -164,7 +164,7 @@ def main():
         sys.exit(1)
     
     # Create and push tag
-    tag_name = f"v{new_version}"
+    tag_name = f"{new_version}"
     if not run_command(f'git tag -a {tag_name} -m "Release {tag_name}"', project_root, f"Creating tag {tag_name}"):
         sys.exit(1)
     
