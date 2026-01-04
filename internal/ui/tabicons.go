@@ -8,13 +8,6 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-//go:embed timecode.svg
-var resourceTimecodeSvgData []byte
-var resourceTimecodeSvg = &fyne.StaticResource{
-	StaticName:    "timecode.svg",
-	StaticContent: resourceTimecodeSvgData,
-}
-
 //go:embed delay.svg
 var resourceDelaySvgData []byte
 var resourceDelaySvg = &fyne.StaticResource{
@@ -22,18 +15,18 @@ var resourceDelaySvg = &fyne.StaticResource{
 	StaticContent: resourceDelaySvgData,
 }
 
-//go:embed note2freq.svg
-var resourceNote2freqSvgData []byte
-var resourceNote2freqSvg = &fyne.StaticResource{
-	StaticName:    "note2freq.svg",
-	StaticContent: resourceNote2freqSvgData,
-}
-
 //go:embed freq2note.svg
 var resourceFreq2noteSvgData []byte
 var resourceFreq2noteSvg = &fyne.StaticResource{
 	StaticName:    "freq2note.svg",
 	StaticContent: resourceFreq2noteSvgData,
+}
+
+//go:embed note2freq.svg
+var resourceNote2freqSvgData []byte
+var resourceNote2freqSvg = &fyne.StaticResource{
+	StaticName:    "note2freq.svg",
+	StaticContent: resourceNote2freqSvgData,
 }
 
 //go:embed samplelength.svg
@@ -48,4 +41,11 @@ var resourceTempochangeSvgData []byte
 var resourceTempochangeSvg = &fyne.StaticResource{
 	StaticName:    "tempochange.svg",
 	StaticContent: resourceTempochangeSvgData,
+}
+
+//go:embed timecode.svg
+var resourceTimecodeSvgData []byte
+var resourceTimecodeSvg = &fyne.StaticResource{
+	StaticName:    "timecode.svg",
+	StaticContent: resourceTimecodeSvgData,
 }

@@ -2,13 +2,11 @@
     <rect x="0" y="0" width="100" height="100" rx="12" fill="#171718" />
 
     <g fill="#33CCFF">
-        <rect x="24" y="22" width="10" height="10" rx="2" />
-        <rect x="24" y="42" width="10" height="10" rx="2" />
+        <rect x="10" y="25" width="14" height="14" rx="2" />
+        <rect x="10" y="60" width="14" height="14" rx="2" />
 
-        <path d="M42,16 h20 a4,4 0 0 1 4,4 v34 a4,4 0 0 1 -4,4 h-20 a4,4 0 0 1 -4,-4 v-34 a4,4 0 0 1 4,-4 z M48,24 v20 h8 v-20 z" fill-rule="evenodd"/>
+        <path d="M32,20 h26 a4,4 0 0 1 4,4 v52 a4,4 0 0 1 -4,4 h-26 a4,4 0 0 1 -4,-4 v-52 a4,4 0 0 1 4,-4 z M40,32 v30 h10 v-30 z" fill-rule="evenodd"/>
 
-        <path d="M70,16 h20 a4,4 0 0 1 4,4 v34 a4,4 0 0 1 -4,4 h-20 a4,4 0 0 1 -4,-4 v-34 a4,4 0 0 1 4,-4 z M76,24 v20 h8 v-20 z" fill-rule="evenodd"/>
+        <path d="M66,20 h26 a4,4 0 0 1 4,4 v52 a4,4 0 0 1 -4,4 h-26 a4,4 0 0 1 -4,-4 v-52 a4,4 0 0 1 4,-4 z M74,32 v30 h10 v-30 z" fill-rule="evenodd"/>
     </g>
-
-    <text x="50" y="88" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="22" text-anchor="middle" fill="#FFFFFF">SMPTE</text>
 </svg>
