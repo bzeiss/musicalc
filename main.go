@@ -1,18 +1,29 @@
 package main
 
 import (
+	_ "embed"
 	"musicalc/internal/ui"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 )
 
+//go:embed VERSION
+var version string
+
 func main() {
 	myApp := app.NewWithID("com.musicalc")
 	myApp.Settings().SetTheme(ui.NewCustomTheme())
 
-	window := myApp.NewWindow("MusiCalc")
+	// Read version and create window title
+	ver := strings.TrimSpace(version)
+	windowTitle := "MusiCalc"
+	if ver != "" {
+		windowTitle = "MusiCalc v" + ver
+	}
+	window := myApp.NewWindow(windowTitle)
 	window.Resize(fyne.NewSize(450, 650))
 	window.SetFixedSize(true)
 
