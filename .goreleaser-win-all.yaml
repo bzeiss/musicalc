@@ -37,11 +37,11 @@ builds:
     binary: musicalc_arm64
     no_unique_dist_dir: true
 
-archives:
-  - id: binary-only
-    # Change 'format' to 'formats' and use a list []
-    formats: [binary]
-    name_template: "{{ .Binary }}"
-    # This prevents GoReleaser from adding default README/LICENSE files
-    files:
-      - none*
+# archives:
+#   - id: binary-only
+#     # Change 'format' to 'formats' and use a list []
+#     formats: [binary]
+#     name_template: "{{ .Binary }}"
+#     # This prevents GoReleaser from adding default README/LICENSE files
+#     files:
+#       - none*
