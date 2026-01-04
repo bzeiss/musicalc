@@ -86,6 +86,28 @@ func NewTimecodeTab() fyne.CanvasObject {
 		timecode2Label.SetText(fmt.Sprintf("(%df @ %s)", result.TotalFrames, fpsLabel))
 	}
 
+	// Helper function to format history entry with right-aligned frame counts
+	formatHistoryEntry := func(tc1 string, frames1 int, tc2 string, frames2 int, resultTC string, resultFrames int, fpsLabel string, operator string) string {
+		// Find the maximum width needed for frame counts
+		frame1Str := fmt.Sprintf("%d", frames1)
+		frame2Str := fmt.Sprintf("%d", frames2)
+		resultFrameStr := fmt.Sprintf("%d", resultFrames)
+
+		maxWidth := len(frame1Str)
+		if len(frame2Str) > maxWidth {
+			maxWidth = len(frame2Str)
+		}
+		if len(resultFrameStr) > maxWidth {
+			maxWidth = len(resultFrameStr)
+		}
+
+		// Format with right-aligned frame counts
+		return fmt.Sprintf("  %s (%*df)\n%s %s (%*df)\n= %s (%*df) @%s",
+			tc1, maxWidth, frames1,
+			operator, tc2, maxWidth, frames2,
+			resultTC, maxWidth, resultFrames, fpsLabel)
+	}
+
 	// Track previous FPS for conversion history
 	var previousFPS string
 	previousFPS = "30 fps"
@@ -124,8 +146,16 @@ func NewTimecodeTab() fyne.CanvasObject {
 				oldFpsLabel := strings.Split(previousFPS, " ")[0]
 				newFpsLabel := strings.Split(s, " ")[0]
 
-				conversionEntry := fmt.Sprintf("  %s (%df) @%s\n= %s (%df) @%s",
-					oldTC, oldFrames, oldFpsLabel, newTC, newFrames, newFpsLabel)
+				// Find max width for frame alignment
+				oldFrameStr := fmt.Sprintf("%d", oldFrames)
+				newFrameStr := fmt.Sprintf("%d", newFrames)
+				maxWidth := len(oldFrameStr)
+				if len(newFrameStr) > maxWidth {
+					maxWidth = len(newFrameStr)
+				}
+
+				conversionEntry := fmt.Sprintf("  %s (%*df) @%s\n= %s (%*df) @%s",
+					oldTC, maxWidth, oldFrames, oldFpsLabel, newTC, maxWidth, newFrames, newFpsLabel)
 				historyList = append(historyList, conversionEntry)
 				historyText.SetText(strings.Join(historyList, "\n\n"))
 				historyText.Refresh()
@@ -155,8 +185,7 @@ func NewTimecodeTab() fyne.CanvasObject {
 		frames2 := logic.TimecodeToFrames(h2, m2, s2, f2, format)
 
 		fpsLabel := strings.Split(fpsSelect.Selected, " ")[0]
-		historyEntry := fmt.Sprintf("  %s (%df)\n+ %s (%df)\n= %s (%df) @%s",
-			tc1, frames1, tc2, frames2, result.Timecode, result.TotalFrames, fpsLabel)
+		historyEntry := formatHistoryEntry(tc1, frames1, tc2, frames2, result.Timecode, result.TotalFrames, fpsLabel, "+")
 		historyList = append(historyList, historyEntry)
 		historyText.SetText(strings.Join(historyList, "\n\n"))
 		historyText.Refresh()
@@ -190,8 +219,7 @@ func NewTimecodeTab() fyne.CanvasObject {
 		frames2 := logic.TimecodeToFrames(h2, m2, s2, f2, format)
 
 		fpsLabel := strings.Split(fpsSelect.Selected, " ")[0]
-		historyEntry := fmt.Sprintf("  %s (%df)\n- %s (%df)\n= %s (%df) @%s",
-			tc1, frames1, tc2, frames2, result.Timecode, result.TotalFrames, fpsLabel)
+		historyEntry := formatHistoryEntry(tc1, frames1, tc2, frames2, result.Timecode, result.TotalFrames, fpsLabel, "-")
 		historyList = append(historyList, historyEntry)
 		historyText.SetText(strings.Join(historyList, "\n\n"))
 		historyText.Refresh()

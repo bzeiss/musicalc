@@ -15,7 +15,11 @@ var version string
 
 func main() {
 	myApp := app.NewWithID("com.musicalc")
-	myApp.Settings().SetTheme(ui.NewCustomTheme())
+
+	// Apply custom theme only on desktop, use default theme on mobile
+	if !fyne.CurrentDevice().IsMobile() {
+		myApp.Settings().SetTheme(ui.NewCustomTheme())
+	}
 
 	// Read version and create window title
 	ver := strings.TrimSpace(version)
