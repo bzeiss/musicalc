@@ -14,30 +14,30 @@ import (
 func NewTempoChangeTab() fyne.CanvasObject {
 	// Tempo bindings
 	originalTempo := binding.NewString()
-	_ = originalTempo.Set("140.00")
+	_ = originalTempo.Set("120")
 
 	// Input/output fields
 	originalTempoEntry := widget.NewEntry()
-	originalTempoEntry.SetText("140.00")
+	originalTempoEntry.SetText("120")
 
 	newTempoEntry := widget.NewEntry()
-	newTempoEntry.SetText("22.00")
+	newTempoEntry.SetText("100")
 
 	timeStretchEntry := widget.NewEntry()
-	timeStretchEntry.SetText("636.36")
+	timeStretchEntry.PlaceHolder = "Time stretching %"
 
 	// Read-only output fields (using Labels)
-	tempoDeltaLabel := widget.NewLabel("-84.29 %")
+	tempoDeltaLabel := widget.NewLabel("")
 
 	// Editable transpose inputs (standard notation)
 	semitonesEntry := widget.NewEntry()
-	semitonesEntry.SetText("-33")
+	semitonesEntry.PlaceHolder = "Transpose Semis"
 	centsEntry := widget.NewEntry()
-	centsEntry.SetText("96")
+	centsEntry.PlaceHolder = "Transpose Cents"
 
 	// Read-only 50-cent notation outputs
-	semitones50Label := widget.NewLabel("-32")
-	cents50Label := widget.NewLabel("-4")
+	semitones50Label := widget.NewLabel("")
+	cents50Label := widget.NewLabel("")
 
 	// Flag to prevent circular updates
 	updating := false
@@ -55,7 +55,12 @@ func NewTempoChangeTab() fyne.CanvasObject {
 
 		if origTempo > 0 && newTempo > 0 {
 			res := logic.CalculateFromNewTempo(origTempo, newTempo)
-			timeStretchEntry.SetText(fmt.Sprintf("%.2f", res.TimeStretchPercent))
+			// Format time stretch: omit .00 suffix if whole number
+			if res.TimeStretchPercent == float64(int(res.TimeStretchPercent)) {
+				timeStretchEntry.SetText(fmt.Sprintf("%d", int(res.TimeStretchPercent)))
+			} else {
+				timeStretchEntry.SetText(fmt.Sprintf("%.2f", res.TimeStretchPercent))
+			}
 
 			sign := ""
 			if res.TempoVariation > 0 {
@@ -102,7 +107,12 @@ func NewTempoChangeTab() fyne.CanvasObject {
 
 		if origTempo > 0 && timeStretch > 0 {
 			res := logic.CalculateFromTimeStretch(origTempo, timeStretch)
-			newTempoEntry.SetText(fmt.Sprintf("%.2f", res.NewTempo))
+			// Format new tempo: omit .00 suffix if whole number
+			if res.NewTempo == float64(int(res.NewTempo)) {
+				newTempoEntry.SetText(fmt.Sprintf("%d", int(res.NewTempo)))
+			} else {
+				newTempoEntry.SetText(fmt.Sprintf("%.2f", res.NewTempo))
+			}
 
 			sign := ""
 			if res.TempoVariation > 0 {
@@ -217,8 +227,18 @@ func NewTempoChangeTab() fyne.CanvasObject {
 
 		if origTempo > 0 {
 			res := logic.CalculateFromTranspose(origTempo, semitones, cents)
-			newTempoEntry.SetText(fmt.Sprintf("%.2f", res.NewTempo))
-			timeStretchEntry.SetText(fmt.Sprintf("%.2f", res.TimeStretchPercent))
+			// Format new tempo: omit .00 suffix if whole number
+			if res.NewTempo == float64(int(res.NewTempo)) {
+				newTempoEntry.SetText(fmt.Sprintf("%d", int(res.NewTempo)))
+			} else {
+				newTempoEntry.SetText(fmt.Sprintf("%.2f", res.NewTempo))
+			}
+			// Format time stretch: omit .00 suffix if whole number
+			if res.TimeStretchPercent == float64(int(res.TimeStretchPercent)) {
+				timeStretchEntry.SetText(fmt.Sprintf("%d", int(res.TimeStretchPercent)))
+			} else {
+				timeStretchEntry.SetText(fmt.Sprintf("%.2f", res.TimeStretchPercent))
+			}
 
 			sign := ""
 			if res.TempoVariation > 0 {
@@ -243,9 +263,9 @@ func NewTempoChangeTab() fyne.CanvasObject {
 	// Reset function (defined after calculation functions so it can call them)
 	resetToDefaults := func() {
 		updating = true
-		_ = originalTempo.Set("140.00")
-		originalTempoEntry.SetText("140.00")
-		newTempoEntry.SetText("22.00")
+		_ = originalTempo.Set("120")
+		originalTempoEntry.SetText("120")
+		newTempoEntry.SetText("100")
 		updating = false
 		// Trigger recalculation of all dependent fields
 		calcFromNewTempo()
@@ -262,7 +282,7 @@ func NewTempoChangeTab() fyne.CanvasObject {
 	centsEntry.OnChanged = func(s string) { calcFromTranspose() }
 
 	// Swap button to swap original and new tempo
-	swapBtn := widget.NewButton("⇄", func() {
+	swapBtn := widget.NewButton("⇄ Swap Tempo", func() {
 		origText := originalTempoEntry.Text
 		newText := newTempoEntry.Text
 		originalTempoEntry.SetText(newText)
@@ -270,51 +290,53 @@ func NewTempoChangeTab() fyne.CanvasObject {
 	})
 
 	// Reset button
-	resetBtn := widget.NewButton("↻", func() {
+	resetBtn := widget.NewButton("↻ Reset", func() {
 		resetToDefaults()
 	})
 
+	// Initialize calculated fields on startup
+	calcFromNewTempo()
+
 	return container.NewVBox(
+		widget.NewLabelWithStyle("Tempo Change / Timestretching", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		widget.NewSeparator(),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Tempo:"),
+			widget.NewLabel("Tempo"),
 			originalTempoEntry,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("New tempo:"),
+			widget.NewLabel("New Tempo"),
 			newTempoEntry,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Swap Tempo / New Tempo:"),
 			swapBtn,
-		),
-		container.NewGridWithColumns(2,
-			widget.NewLabel("Reset:"),
 			resetBtn,
 		),
 		widget.NewSeparator(),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Time stretching %:"),
+			widget.NewLabel("Time stretching %"),
 			timeStretchEntry,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Tempo Delta:"),
+			widget.NewLabel("Tempo Delta"),
 			tempoDeltaLabel,
 		),
 		widget.NewSeparator(),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Transpose semis:"),
+			widget.NewLabel("Transpose Semis"),
 			semitonesEntry,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Semis for 50 cents notation:"),
+			widget.NewLabel("Transpose Cents"),
+			centsEntry,
+		),
+		widget.NewSeparator(),
+		container.NewGridWithColumns(2,
+			widget.NewLabel("Transpose Semis (50 Cents)"),
 			semitones50Label,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Transpose cents:"),
-			centsEntry,
-		),
-		container.NewGridWithColumns(2,
-			widget.NewLabel("Cents for 50 cents notation:"),
+			widget.NewLabel("Transpose Cents (50 Cents)"),
 			cents50Label,
 		),
 	)

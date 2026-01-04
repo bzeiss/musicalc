@@ -178,7 +178,7 @@ func NewSampleLengthTab() fyne.CanvasObject {
 	})
 
 	return container.NewVBox(
-		widget.NewLabelWithStyle("Sample Length / Timestretching", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		widget.NewLabelWithStyle("Sample Length", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		widget.NewSeparator(),
 		container.NewGridWithColumns(2,
 			widget.NewLabel("Sample Rate"),

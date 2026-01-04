@@ -162,11 +162,11 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 		),
 		widget.NewSeparator(),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Note (50 cents)"),
+			widget.NewLabel("Note (50 Cents)"),
 			note50Label,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Cents (50 cents)"),
+			widget.NewLabel("Cents (50 Cents)"),
 			cents50Label,
 		),
 	)
