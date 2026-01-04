@@ -1,5 +1,16 @@
 # Icon Usage Guide
 
+## Generated a tabicons.go bundle from for the tab bar icons
+* in internal/ui:
+```
+fyne.exe bundle -package ui -o tabicons.go timecode.svg
+fyne.exe bundle -append -package ui -o tabicons.go delay.svg
+fyne.exe bundle -append -package ui -o tabicons.go note2freq.svg
+fyne.exe bundle -append -package ui -o tabicons.go freq2note.svg
+fyne.exe bundle -append -package ui -o tabicons.go samplelength.svg
+fyne.exe bundle -append -package ui -o tabicons.go tempochange.svg
+```
+
 ## Two Separate Icon Files Needed
 
 ### 1. Installer Icon (Windows Only)
