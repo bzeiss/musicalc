@@ -10,6 +10,7 @@ import (
 
 func main() {
 	myApp := app.NewWithID("com.musicalc")
+	myApp.Settings().SetTheme(ui.NewCustomTheme())
 
 	window := myApp.NewWindow("MusiCalc")
 	window.Resize(fyne.NewSize(450, 650))
@@ -21,13 +22,32 @@ func main() {
 		window.SetIcon(icon)
 	}
 
+	// Create icon-only tabs using bundled resources (no text to save space on mobile)
+	timecodeTab := container.NewTabItem("", ui.NewTimecodeTab())
+	timecodeTab.Icon = ui.ResourceTimecodeSvg
+
+	tempoTab := container.NewTabItem("", ui.NewTempoTab())
+	tempoTab.Icon = ui.ResourceDelaySvg
+
+	note2freqTab := container.NewTabItem("", ui.NewDiapasonTab())
+	note2freqTab.Icon = ui.ResourceNote2freqSvg
+
+	freq2noteTab := container.NewTabItem("", ui.NewFrequencyToNoteTab())
+	freq2noteTab.Icon = ui.ResourceFreq2noteSvg
+
+	sampleLengthTab := container.NewTabItem("", ui.NewSampleLengthTab())
+	sampleLengthTab.Icon = ui.ResourceSamplelengthSvg
+
+	tempoChangeTab := container.NewTabItem("", ui.NewTempoChangeTab())
+	tempoChangeTab.Icon = ui.ResourceTempochangeSvg
+
 	tabs := container.NewAppTabs(
-		container.NewTabItem("Timecode", ui.NewTimecodeTab()),
-		container.NewTabItem("Tempo2Delay", ui.NewTempoTab()),
-		container.NewTabItem("Note2Freq", ui.NewDiapasonTab()),
-		container.NewTabItem("Freq2Note", ui.NewFrequencyToNoteTab()),
-		container.NewTabItem("Sample Length", ui.NewSampleLengthTab()),
-		container.NewTabItem("Tempo Change", ui.NewTempoChangeTab()),
+		timecodeTab,
+		tempoTab,
+		note2freqTab,
+		freq2noteTab,
+		sampleLengthTab,
+		tempoChangeTab,
 	)
 
 	tabs.SetTabLocation(container.TabLocationBottom) // Mobile ergonomic standard
