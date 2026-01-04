@@ -3,7 +3,7 @@ package ui
 import (
 	"fmt"
 	"musicalc/internal/logic"
-	"strconv"
+	"musicalc/internal/ui/widgets"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -21,29 +21,22 @@ func NewTimecodeTab() fyne.CanvasObject {
 	fpsSelect := widget.NewSelect(fpsFormats, nil)
 	fpsSelect.SetSelected("30 fps")
 
-	// First timecode inputs
-	hours1Entry := widget.NewEntry()
-
-	minutes1Entry := widget.NewEntry()
-
-	seconds1Entry := widget.NewEntry()
-
-	frames1Entry := widget.NewEntry()
+	// First timecode input (single field)
+	timecode1Entry := widgets.NewTimecodeEntry(false)
 
 	// Output label for first timecode (compact format)
 	timecode1Label := widget.NewLabel("00:00:00:00 (0 frames @ 30)")
 
-	// Second timecode inputs
-	hours2Entry := widget.NewEntry()
-
-	minutes2Entry := widget.NewEntry()
-
-	seconds2Entry := widget.NewEntry()
-
-	frames2Entry := widget.NewEntry()
+	// Second timecode input (single field)
+	timecode2Entry := widgets.NewTimecodeEntry(false)
 
 	// Output label for second timecode (compact format)
 	timecode2Label := widget.NewLabel("00:00:00:00 (0 frames @ 30)")
+
+	// Auto-focus Timecode 2 when Timecode 1 is complete
+	timecode1Entry.OnComplete = func() {
+		fyne.CurrentApp().Driver().CanvasForObject(timecode2Entry).Focus(timecode2Entry)
+	}
 
 	// History display (multi-line entry for copy/paste support)
 	historyText := widget.NewMultiLineEntry()
@@ -65,32 +58,7 @@ func NewTimecodeTab() fyne.CanvasObject {
 		updating = true
 		defer func() { updating = false }()
 
-		h1 := int(logic.ParseFloat(hours1Entry.Text))
-		m1 := int(logic.ParseFloat(minutes1Entry.Text))
-		s1 := int(logic.ParseFloat(seconds1Entry.Text))
-		f1 := int(logic.ParseFloat(frames1Entry.Text))
-
-		if h1 < 0 {
-			h1 = 0
-		}
-		if m1 < 0 {
-			m1 = 0
-		}
-		if m1 > 99 {
-			m1 = 99
-		}
-		if s1 < 0 {
-			s1 = 0
-		}
-		if s1 > 99 {
-			s1 = 99
-		}
-		if f1 < 0 {
-			f1 = 0
-		}
-		if f1 > 99 {
-			f1 = 99
-		}
+		h1, m1, s1, f1 := timecode1Entry.GetComponents()
 
 		format := logic.GetFPSFormat(fpsSelect.Selected)
 		totalFrames := logic.TimecodeToFrames(h1, m1, s1, f1, format)
@@ -105,33 +73,10 @@ func NewTimecodeTab() fyne.CanvasObject {
 		if updating {
 			return
 		}
+		updating = true
+		defer func() { updating = false }()
 
-		h2 := int(logic.ParseFloat(hours2Entry.Text))
-		m2 := int(logic.ParseFloat(minutes2Entry.Text))
-		s2 := int(logic.ParseFloat(seconds2Entry.Text))
-		f2 := int(logic.ParseFloat(frames2Entry.Text))
-
-		if h2 < 0 {
-			h2 = 0
-		}
-		if m2 < 0 {
-			m2 = 0
-		}
-		if m2 > 99 {
-			m2 = 99
-		}
-		if s2 < 0 {
-			s2 = 0
-		}
-		if s2 > 99 {
-			s2 = 99
-		}
-		if f2 < 0 {
-			f2 = 0
-		}
-		if f2 > 99 {
-			f2 = 99
-		}
+		h2, m2, s2, f2 := timecode2Entry.GetComponents()
 
 		format := logic.GetFPSFormat(fpsSelect.Selected)
 		totalFrames := logic.TimecodeToFrames(h2, m2, s2, f2, format)
@@ -145,25 +90,20 @@ func NewTimecodeTab() fyne.CanvasObject {
 	var previousFPS string
 	previousFPS = "30 fps"
 
-	// Wire up timecode change handlers
-	hours1Entry.OnChanged = func(s string) { calculateTimecode1() }
-	minutes1Entry.OnChanged = func(s string) { calculateTimecode1() }
-	seconds1Entry.OnChanged = func(s string) { calculateTimecode1() }
-	frames1Entry.OnChanged = func(s string) { calculateTimecode1() }
+	// Wire up change handlers
+	timecode1Entry.OnChanged = func(s string) {
+		calculateTimecode1()
+	}
 
-	hours2Entry.OnChanged = func(s string) { calculateTimecode2() }
-	minutes2Entry.OnChanged = func(s string) { calculateTimecode2() }
-	seconds2Entry.OnChanged = func(s string) { calculateTimecode2() }
-	frames2Entry.OnChanged = func(s string) { calculateTimecode2() }
+	timecode2Entry.OnChanged = func(s string) {
+		calculateTimecode2()
+	}
 
 	fpsSelect.OnChanged = func(s string) {
 		// Only do conversion if FPS actually changed and there's a non-zero timecode
 		if previousFPS != "" && previousFPS != s {
 			// Get current timecode 1 values
-			h1 := int(logic.ParseFloat(hours1Entry.Text))
-			m1 := int(logic.ParseFloat(minutes1Entry.Text))
-			s1 := int(logic.ParseFloat(seconds1Entry.Text))
-			f1 := int(logic.ParseFloat(frames1Entry.Text))
+			h1, m1, s1, f1 := timecode1Entry.GetComponents()
 
 			// Only add conversion history if there's an actual timecode to convert
 			if h1 > 0 || m1 > 0 || s1 > 0 || f1 > 0 {
@@ -202,60 +142,8 @@ func NewTimecodeTab() fyne.CanvasObject {
 
 	// Add operation
 	addButton := widget.NewButton("Add", func() {
-		h1 := int(logic.ParseFloat(hours1Entry.Text))
-		m1 := int(logic.ParseFloat(minutes1Entry.Text))
-		s1 := int(logic.ParseFloat(seconds1Entry.Text))
-		f1 := int(logic.ParseFloat(frames1Entry.Text))
-
-		h2 := int(logic.ParseFloat(hours2Entry.Text))
-		m2 := int(logic.ParseFloat(minutes2Entry.Text))
-		s2 := int(logic.ParseFloat(seconds2Entry.Text))
-		f2 := int(logic.ParseFloat(frames2Entry.Text))
-
-		// Clamp values
-		if h1 < 0 {
-			h1 = 0
-		}
-		if m1 < 0 {
-			m1 = 0
-		}
-		if m1 > 99 {
-			m1 = 99
-		}
-		if s1 < 0 {
-			s1 = 0
-		}
-		if s1 > 99 {
-			s1 = 99
-		}
-		if f1 < 0 {
-			f1 = 0
-		}
-		if f1 > 99 {
-			f1 = 99
-		}
-
-		if h2 < 0 {
-			h2 = 0
-		}
-		if m2 < 0 {
-			m2 = 0
-		}
-		if m2 > 99 {
-			m2 = 99
-		}
-		if s2 < 0 {
-			s2 = 0
-		}
-		if s2 > 99 {
-			s2 = 99
-		}
-		if f2 < 0 {
-			f2 = 0
-		}
-		if f2 > 99 {
-			f2 = 99
-		}
+		h1, m1, s1, f1 := timecode1Entry.GetComponents()
+		h2, m2, s2, f2 := timecode2Entry.GetComponents()
 
 		format := logic.GetFPSFormat(fpsSelect.Selected)
 		result := logic.AddTimecodes(h1, m1, s1, f1, h2, m2, s2, f2, format)
@@ -276,75 +164,20 @@ func NewTimecodeTab() fyne.CanvasObject {
 
 		// Update first timecode with result and reset second timecode
 		updating = true
-		hours1Entry.SetText(strconv.Itoa(result.Hours))
-		minutes1Entry.SetText(strconv.Itoa(result.Minutes))
-		seconds1Entry.SetText(strconv.Itoa(result.Seconds))
-		frames1Entry.SetText(strconv.Itoa(result.Frames))
-		hours2Entry.SetText("")
-		minutes2Entry.SetText("")
-		seconds2Entry.SetText("")
-		frames2Entry.SetText("")
+		timecode1Entry.SetComponents(result.Hours, result.Minutes, result.Seconds, result.Frames)
+		timecode2Entry.SetText("")
 		updating = false
 		calculateTimecode1()
 		calculateTimecode2()
+
+		// Focus Timecode 2 for next input
+		fyne.CurrentApp().Driver().CanvasForObject(timecode2Entry).Focus(timecode2Entry)
 	})
 
 	// Subtract operation
 	subtractButton := widget.NewButton("Subtract", func() {
-		h1 := int(logic.ParseFloat(hours1Entry.Text))
-		m1 := int(logic.ParseFloat(minutes1Entry.Text))
-		s1 := int(logic.ParseFloat(seconds1Entry.Text))
-		f1 := int(logic.ParseFloat(frames1Entry.Text))
-
-		h2 := int(logic.ParseFloat(hours2Entry.Text))
-		m2 := int(logic.ParseFloat(minutes2Entry.Text))
-		s2 := int(logic.ParseFloat(seconds2Entry.Text))
-		f2 := int(logic.ParseFloat(frames2Entry.Text))
-
-		// Clamp values
-		if h1 < 0 {
-			h1 = 0
-		}
-		if m1 < 0 {
-			m1 = 0
-		}
-		if m1 > 99 {
-			m1 = 99
-		}
-		if s1 < 0 {
-			s1 = 0
-		}
-		if s1 > 99 {
-			s1 = 99
-		}
-		if f1 < 0 {
-			f1 = 0
-		}
-		if f1 > 99 {
-			f1 = 99
-		}
-
-		if h2 < 0 {
-			h2 = 0
-		}
-		if m2 < 0 {
-			m2 = 0
-		}
-		if m2 > 99 {
-			m2 = 99
-		}
-		if s2 < 0 {
-			s2 = 0
-		}
-		if s2 > 99 {
-			s2 = 99
-		}
-		if f2 < 0 {
-			f2 = 0
-		}
-		if f2 > 99 {
-			f2 = 99
-		}
+		h1, m1, s1, f1 := timecode1Entry.GetComponents()
+		h2, m2, s2, f2 := timecode2Entry.GetComponents()
 
 		format := logic.GetFPSFormat(fpsSelect.Selected)
 		result := logic.SubtractTimecodes(h1, m1, s1, f1, h2, m2, s2, f2, format)
@@ -365,30 +198,21 @@ func NewTimecodeTab() fyne.CanvasObject {
 
 		// Update first timecode with result and reset second timecode
 		updating = true
-		hours1Entry.SetText(strconv.Itoa(result.Hours))
-		minutes1Entry.SetText(strconv.Itoa(result.Minutes))
-		seconds1Entry.SetText(strconv.Itoa(result.Seconds))
-		frames1Entry.SetText(strconv.Itoa(result.Frames))
-		hours2Entry.SetText("")
-		minutes2Entry.SetText("")
-		seconds2Entry.SetText("")
-		frames2Entry.SetText("")
+		timecode1Entry.SetComponents(result.Hours, result.Minutes, result.Seconds, result.Frames)
+		timecode2Entry.SetText("")
 		updating = false
 		calculateTimecode1()
 		calculateTimecode2()
+
+		// Focus Timecode 2 for next input
+		fyne.CurrentApp().Driver().CanvasForObject(timecode2Entry).Focus(timecode2Entry)
 	})
 
 	// Reset operation
 	resetButton := widget.NewButton("Reset", func() {
 		updating = true
-		hours1Entry.SetText("")
-		minutes1Entry.SetText("")
-		seconds1Entry.SetText("")
-		frames1Entry.SetText("")
-		hours2Entry.SetText("")
-		minutes2Entry.SetText("")
-		seconds2Entry.SetText("")
-		frames2Entry.SetText("")
+		timecode1Entry.SetText("00:00:00:00")
+		timecode2Entry.SetText("00:00:00:00")
 		historyList = []string{}
 		historyText.SetText("")
 		updating = false
@@ -410,32 +234,16 @@ func NewTimecodeTab() fyne.CanvasObject {
 		container.NewVBox(
 			widget.NewLabelWithStyle("Timecode 1", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 			widget.NewSeparator(),
-			container.NewGridWithColumns(4,
-				widget.NewLabel("Hours:"),
-				hours1Entry,
-				widget.NewLabel("Minutes:"),
-				minutes1Entry,
-			),
-			container.NewGridWithColumns(4,
-				widget.NewLabel("Seconds:"),
-				seconds1Entry,
-				widget.NewLabel("Frames:"),
-				frames1Entry,
+			container.NewGridWithColumns(2,
+				widget.NewLabel("HH:MM:SS:FF:"),
+				timecode1Entry,
 			),
 			timecode1Label,
 			widget.NewLabelWithStyle("Timecode 2", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 			widget.NewSeparator(),
-			container.NewGridWithColumns(4,
-				widget.NewLabel("Hours:"),
-				hours2Entry,
-				widget.NewLabel("Minutes:"),
-				minutes2Entry,
-			),
-			container.NewGridWithColumns(4,
-				widget.NewLabel("Seconds:"),
-				seconds2Entry,
-				widget.NewLabel("Frames:"),
-				frames2Entry,
+			container.NewGridWithColumns(2,
+				widget.NewLabel("HH:MM:SS:FF:"),
+				timecode2Entry,
 			),
 			timecode2Label,
 			widget.NewSeparator(),
