@@ -2,7 +2,7 @@
 ; Music Calculator Application - Universal Architecture Version
 
 #define MyAppName "MusiCalc"
-#define MyAppVersion "0.8.3"
+#define MyAppVersion "0.8.4"
 #define MyAppPublisher "B. Zeiss"
 #define MyAppURL "https://github.com/bzeiss/musicalc"
 #define MyAppExeName "musicalc.exe"
