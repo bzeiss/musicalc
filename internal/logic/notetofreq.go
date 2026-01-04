@@ -21,19 +21,25 @@ var (
 	tuningCacheMutex sync.RWMutex
 	cachedTuningName string
 	cachedTuning     scala.Tuning
-	cachedRefA4      float64
+	cachedRefFreq    float64
+	cachedRefMidi    int
 )
 
 // GetFrequency calculates the frequency for a given MIDI note using the specified tuning.
 // Parameters:
 //   - midiNote: MIDI note number (0-127)
-//   - refA4: Reference frequency for A4 (default 440 Hz if <= 0)
+//   - refFreq: Reference frequency in Hz (default 440 Hz if <= 0)
+//   - refMidi: Reference MIDI note for refFreq (default 69 = A4 if <= 0)
 //   - tuningName (optional): Name of tuning from scl.AvailableScales. Uses default if empty.
 //
 // Returns NoteFrequency with frequency in Hz and cents deviation from 12-TET.
-func GetFrequency(midiNote int, refA4 float64, tuningName ...string) NoteFrequency {
-	if refA4 <= 0 {
-		refA4 = 440.0
+func GetFrequency(midiNote int, refFreq float64, refMidi int, tuningName ...string) NoteFrequency {
+	if refFreq <= 0 {
+		refFreq = 440.0
+	}
+
+	if refMidi <= 0 || refMidi > 127 {
+		refMidi = 69 // Default to A4
 	}
 
 	// Determine which tuning to use
@@ -45,19 +51,19 @@ func GetFrequency(midiNote int, refA4 float64, tuningName ...string) NoteFrequen
 	}
 
 	// Load tuning (from cache or fresh)
-	tuning := loadTuning(selectedTuning, refA4)
+	tuning := loadTuning(selectedTuning, refFreq, refMidi)
 	if tuning == nil {
 		// Fallback to 12-TET if tuning load fails
-		freq := refA4 * math.Pow(2, float64(midiNote-69)/12.0)
+		freq := refFreq * math.Pow(2, float64(midiNote-refMidi)/12.0)
 		return NoteFrequency{Frequency: freq, Cents: 0.0}
 	}
 
 	// Use the tuning to get the frequency directly
-	// The tuning is calibrated to our refA4 frequency
+	// The tuning is calibrated to our reference frequency at refMidi
 	freq := tuning.FrequencyForMidiNote(midiNote)
 
 	// Calculate 12-TET frequency for comparison
-	tetFreq := refA4 * math.Pow(2, float64(midiNote-69)/12.0)
+	tetFreq := refFreq * math.Pow(2, float64(midiNote-refMidi)/12.0)
 
 	// Calculate cents deviation from 12-TET
 	// cents = 1200 * log2(freq / tetFreq)
@@ -69,11 +75,11 @@ func GetFrequency(midiNote int, refA4 float64, tuningName ...string) NoteFrequen
 	return NoteFrequency{Frequency: freq, Cents: cents}
 }
 
-// loadTuning loads and caches the specified tuning by name and reference frequency
-func loadTuning(tuningName string, refA4 float64) scala.Tuning {
+// loadTuning loads and caches the specified tuning by name, reference frequency, and reference MIDI note
+func loadTuning(tuningName string, refFreq float64, refMidi int) scala.Tuning {
 	// Check cache first
 	tuningCacheMutex.RLock()
-	if cachedTuningName == tuningName && cachedTuning != nil && cachedRefA4 == refA4 {
+	if cachedTuningName == tuningName && cachedTuning != nil && cachedRefFreq == refFreq && cachedRefMidi == refMidi {
 		tuning := cachedTuning
 		tuningCacheMutex.RUnlock()
 		return tuning
@@ -85,7 +91,7 @@ func loadTuning(tuningName string, refA4 float64) scala.Tuning {
 	defer tuningCacheMutex.Unlock()
 
 	// Double-check after acquiring write lock
-	if cachedTuningName == tuningName && cachedTuning != nil && cachedRefA4 == refA4 {
+	if cachedTuningName == tuningName && cachedTuning != nil && cachedRefFreq == refFreq && cachedRefMidi == refMidi {
 		return cachedTuning
 	}
 
@@ -102,9 +108,9 @@ func loadTuning(tuningName string, refA4 float64) scala.Tuning {
 		return nil
 	}
 
-	// Create keyboard mapping tuned to our reference A4
-	// Standard keyboard mapping with A69 (MIDI 69) tuned to refA4
-	kbm, err := scala.KeyboardMappingTuneA69To(refA4)
+	// Use StartScaleOnAndTuneNoteTo with scale starting on middle C (MIDI 60)
+	// and tuning the reference MIDI note to the reference frequency
+	kbm, err := scala.KeyboardMappingStartScaleOnAndTuneNoteTo(60, refMidi, refFreq)
 	if err != nil {
 		return nil
 	}
@@ -118,7 +124,8 @@ func loadTuning(tuningName string, refA4 float64) scala.Tuning {
 	// Cache the loaded tuning
 	cachedTuningName = tuningName
 	cachedTuning = tuning
-	cachedRefA4 = refA4
+	cachedRefFreq = refFreq
+	cachedRefMidi = refMidi
 
 	return tuning
 }

@@ -2,10 +2,10 @@
     <rect x="0" y="0" width="100" height="100" rx="12" fill="#171718" />
 
     <g>
-        <rect x="12" y="20" width="30" height="60" rx="6" fill="#33CCFF" />
+        <rect x="12" y="20" width="30" height="60" rx="6" fill="#5B43E7" />
 
-        <rect x="48" y="28" width="24" height="44" rx="5" fill="#33CCFF" opacity="0.5" />
+        <rect x="48" y="28" width="24" height="44" rx="5" fill="#5B43E7" opacity="0.5" />
 
-        <rect x="78" y="38" width="16" height="24" rx="4" fill="#33CCFF" opacity="0.2" />
+        <rect x="78" y="38" width="16" height="24" rx="4" fill="#5B43E7" opacity="0.2" />
     </g>
 </svg>

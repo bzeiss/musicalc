@@ -86,6 +86,7 @@ This application is provided for informational purposes only and is not guarante
 - **[Build Instructions](README-BUILD.md)** - How to build from source on Windows, Linux, and macOS
 - **[Creating Installers](README-INSTALLER.md)** - Creating Windows installers and Linux packages
 - **[Icon Resources](README-ICONS.md)** - Icon specifications and resources
+- **[Test Instructions](README-TESTS.md)** - How to run tests
 
 ## Requirements
 
