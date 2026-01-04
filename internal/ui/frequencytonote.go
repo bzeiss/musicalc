@@ -85,7 +85,11 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 			octaveOffset = 2 // C3 convention
 		}
 		freq := logic.GetFrequencyForNote("C", 3, octaveOffset)
-		frequencyEntry.SetText(fmt.Sprintf("%.2f", freq))
+		if freq == float64(int(freq)) {
+			frequencyEntry.SetText(fmt.Sprintf("%d", int(freq)))
+		} else {
+			frequencyEntry.SetText(fmt.Sprintf("%.2f", freq))
+		}
 	})
 
 	a3Button := widget.NewButton("A3", func() {
@@ -94,7 +98,11 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 			octaveOffset = 2 // C3 convention
 		}
 		freq := logic.GetFrequencyForNote("A", 3, octaveOffset)
-		frequencyEntry.SetText(fmt.Sprintf("%.2f", freq))
+		if freq == float64(int(freq)) {
+			frequencyEntry.SetText(fmt.Sprintf("%d", int(freq)))
+		} else {
+			frequencyEntry.SetText(fmt.Sprintf("%.2f", freq))
+		}
 	})
 
 	c4Button := widget.NewButton("C4", func() {
@@ -103,7 +111,11 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 			octaveOffset = 2 // C3 convention
 		}
 		freq := logic.GetFrequencyForNote("C", 4, octaveOffset)
-		frequencyEntry.SetText(fmt.Sprintf("%.2f", freq))
+		if freq == float64(int(freq)) {
+			frequencyEntry.SetText(fmt.Sprintf("%d", int(freq)))
+		} else {
+			frequencyEntry.SetText(fmt.Sprintf("%.2f", freq))
+		}
 	})
 
 	a4Button := widget.NewButton("A4", func() {
@@ -112,7 +124,11 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 			octaveOffset = 2 // C3 convention
 		}
 		freq := logic.GetFrequencyForNote("A", 4, octaveOffset)
-		frequencyEntry.SetText(fmt.Sprintf("%.2f", freq))
+		if freq == float64(int(freq)) {
+			frequencyEntry.SetText(fmt.Sprintf("%d", int(freq)))
+		} else {
+			frequencyEntry.SetText(fmt.Sprintf("%.2f", freq))
+		}
 	})
 
 	// Play button - generates sine wave tone
