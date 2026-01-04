@@ -168,6 +168,9 @@ func NewTimecodeTab() fyne.CanvasObject {
 		previousFPS = s
 		calculateTimecode1()
 		calculateTimecode2()
+
+		// Focus Timecode 2 for next input after FPS change
+		fyne.CurrentApp().Driver().CanvasForObject(timecode2Entry).Focus(timecode2Entry)
 	}
 
 	// Add operation

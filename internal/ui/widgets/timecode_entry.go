@@ -59,8 +59,8 @@ func (e *TimecodeEntry) TypedRune(r rune) {
 	// Locks current field and moves to next field left (frames -> seconds -> minutes -> hours)
 	// Both work for locale compatibility (comma on European keyboards)
 	if r == '.' || r == ',' {
-		// Only add new field if we haven't reached max fields (4: frames, seconds, minutes, hours)
-		if len(e.fields) < 4 {
+		// Only add new field if current field has content and we haven't reached max fields
+		if len(e.fields) < 4 && e.fields[0] != "" {
 			// Insert empty field at beginning, pushing current values right
 			e.fields = append([]string{""}, e.fields...)
 			e.updateDisplay()
@@ -77,7 +77,7 @@ func (e *TimecodeEntry) TypedRune(r rune) {
 			maxDigits = 3
 		}
 
-		// If current field is full, auto-advance to next field
+		// If current field is full, auto-advance to next field first
 		if len(e.fields[0]) >= maxDigits && len(e.fields) < 4 {
 			// Insert new empty field at beginning, pushing current values right
 			e.fields = append([]string{""}, e.fields...)
@@ -99,8 +99,16 @@ func (e *TimecodeEntry) TypedKey(k *fyne.KeyEvent) {
 			e.OnOperationKey(k.Name)
 		}
 		return
-	// Period and comma are handled in TypedRune, not here
-	case fyne.KeyBackspace:
+	case fyne.KeyPeriod, fyne.KeyComma:
+		// Handle period/comma as field separator (for mobile keyboards)
+		// Desktop keyboards send these as TypedRune, but mobile sends as key events
+		if len(e.fields) < 4 && e.fields[0] != "" {
+			// Insert empty field at beginning, pushing current values right
+			e.fields = append([]string{""}, e.fields...)
+			e.updateDisplay()
+		}
+		return
+	case fyne.KeyBackspace, fyne.KeyDelete:
 		// Remove last character from first field (current entry field)
 		if len(e.fields) > 0 {
 			if len(e.fields[0]) > 0 {
