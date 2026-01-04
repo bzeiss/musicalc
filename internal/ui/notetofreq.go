@@ -285,7 +285,7 @@ func NewDiapasonTab() fyne.CanvasObject {
 				refNoteEntry,
 			),
 			container.NewGridWithColumns(2,
-				widget.NewLabel("Frequency"),
+				widget.NewLabel("Frequency (Hz)"),
 				freqInput,
 			),
 			container.NewGridWithColumns(2,

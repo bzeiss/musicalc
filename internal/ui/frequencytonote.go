@@ -14,8 +14,8 @@ import (
 func NewFrequencyToNoteTab() fyne.CanvasObject {
 	// Input field
 	frequencyEntry := widget.NewEntry()
-	frequencyEntry.SetPlaceHolder("Enter frequency (Hz)")
-	frequencyEntry.SetText("440.00")
+	frequencyEntry.SetPlaceHolder("Frequency")
+	frequencyEntry.SetText("440")
 
 	// Middle C convention selector (radio buttons)
 	middleCRadio := widget.NewRadioGroup([]string{"C3", "C4"}, nil)
@@ -123,43 +123,50 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 		}
 	})
 
+	// Reset button
+	resetButton := widget.NewButton("↻ Reset", func() {
+		frequencyEntry.SetText("440")
+		middleCRadio.SetSelected("C3")
+	})
+
 	// Initialize with default frequency (A4 = 440.00 Hz)
 	calculateFromFrequency()
 
 	return container.NewVBox(
+		widget.NewLabelWithStyle("Frequency to Note", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		widget.NewSeparator(),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Frequency (Hz):"),
+			widget.NewLabel("Frequency (Hz)"),
 			frequencyEntry,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Middle C:"),
+			widget.NewLabel("Quickselect"),
+			container.NewHBox(c3Button, a3Button, c4Button, a4Button),
+		),
+		container.NewGridWithColumns(2,
+			widget.NewLabel("Middle C"),
 			middleCRadio,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Quick-Select:"),
-			container.NewHBox(c3Button, a3Button, c4Button, a4Button),
+			playButton,
+			resetButton,
 		),
 		widget.NewSeparator(),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Note:"),
+			widget.NewLabel("Note"),
 			note100Label,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Cents:"),
+			widget.NewLabel("Cents"),
 			cents100Label,
 		),
 		widget.NewSeparator(),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Play:"),
-			playButton,
-		),
-		widget.NewSeparator(),
-		container.NewGridWithColumns(2,
-			widget.NewLabel("Note (50 cents):"),
+			widget.NewLabel("Note (50 cents)"),
 			note50Label,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Cents (50 cents):"),
+			widget.NewLabel("Cents (50 cents)"),
 			cents50Label,
 		),
 	)
