@@ -2,8 +2,9 @@ package ui
 
 import (
 	"fmt"
-	"math"
 	"musicalc/internal/logic"
+	sclres "musicalc/internal/logic/scl"
+	"sort"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -22,56 +23,40 @@ func NewDiapasonTab() fyne.CanvasObject {
 
 	// Tuning system binding
 	tuning := binding.NewString()
-	_ = tuning.Set("Equal Temperament")
+	_ = tuning.Set(sclres.DefaultScaleName)
 
 	// Build reference note options (C0 to B9)
 	noteNames := []string{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}
-	var refNoteOptions []string
-	for octave := 0; octave <= 9; octave++ {
-		for _, note := range noteNames {
-			refNoteOptions = append(refNoteOptions, fmt.Sprintf("%s%d", note, octave))
+
+	// Build tuning options from available scales (sorted alphabetically with default at top)
+	tuningOptions := make([]string, 0, len(sclres.AvailableScales))
+	for name := range sclres.AvailableScales {
+		tuningOptions = append(tuningOptions, name)
+	}
+	sort.Strings(tuningOptions)
+
+	// Move default tuning to the top of the list
+	defaultIdx := -1
+	for i, name := range tuningOptions {
+		if name == sclres.DefaultScaleName {
+			defaultIdx = i
+			break
 		}
 	}
-
-	// Calculate MIDI note number from note name based on octave convention
-	getMidiNote := func(noteName string, octaveOffset int) int {
-		if len(noteName) < 2 {
-			return 69 // Default to A4
-		}
-
-		// Parse note name (e.g., "A3", "C#4")
-		var note string
-		var octave int
-
-		// Handle sharp notes (e.g., C#, D#)
-		if len(noteName) > 2 && noteName[1] == '#' {
-			note = noteName[:2]
-			fmt.Sscanf(noteName[2:], "%d", &octave)
-		} else {
-			note = noteName[:1]
-			fmt.Sscanf(noteName[1:], "%d", &octave)
-		}
-
-		noteIndex := 0
-		for i, n := range noteNames {
-			if n == note {
-				noteIndex = i
-				break
-			}
-		}
-		// Calculate MIDI using the octaveOffset from Middle C convention
-		return (octave+octaveOffset)*12 + noteIndex
+	if defaultIdx > 0 {
+		// Remove default from its position and prepend to the list
+		tuningOptions = append([]string{sclres.DefaultScaleName}, append(tuningOptions[:defaultIdx], tuningOptions[defaultIdx+1:]...)...)
 	}
 
 	// Reset function
 	resetToDefaults := func() {
 		_ = refNote.Set("A3")
 		_ = refFreq.Set("440")
-		_ = tuning.Set("Equal Temperament")
+		_ = tuning.Set(sclres.DefaultScaleName)
 	}
 
-	// Reference note selector with autocomplete (SelectEntry)
-	refNoteEntry := widget.NewSelectEntry(refNoteOptions)
+	// Reference note selector (simple entry, no longer needed for note selection)
+	refNoteEntry := widget.NewEntry()
 	refNoteEntry.SetText("A3")
 	refNoteEntry.OnChanged = func(s string) {
 		_ = refNote.Set(s)
@@ -94,24 +79,25 @@ func NewDiapasonTab() fyne.CanvasObject {
 	// Track previous Middle C selection to avoid adjusting on unchanged selections
 	previousMiddleC := "C3"
 
-	// Tuning selector
-	tuningSelect := widget.NewSelect([]string{"Equal Temperament"}, func(selected string) {
+	// Tuning selector (use SelectEntry for searchable dropdown)
+	tuningSelect := widget.NewSelectEntry(tuningOptions)
+	tuningSelect.SetText(sclres.DefaultScaleName)
+	tuningSelect.OnChanged = func(selected string) {
 		_ = tuning.Set(selected)
-	})
-	tuningSelect.SetSelected("Equal Temperament")
+	}
 
 	// Declare table variable first for use in reset button
 	var table *widget.Table
 
 	// Cache for performance - avoid binding.Get() on every cell render
-	var cachedRefMidi int
 	var cachedRefHz float64
 	var cachedOctaveOffset int
+	var cachedTuningName string
 
 	// Update cache function
 	updateCache := func() {
-		refNoteVal, _ := refNote.Get()
 		refFreqVal, _ := refFreq.Get()
+		tuningVal, _ := tuning.Get()
 
 		// Determine octave offset based on Middle C setting
 		if middleCRadio.Selected == "C3" {
@@ -120,8 +106,8 @@ func NewDiapasonTab() fyne.CanvasObject {
 			cachedOctaveOffset = 1 // C4 convention
 		}
 
-		cachedRefMidi = getMidiNote(refNoteVal, cachedOctaveOffset)
 		cachedRefHz = logic.ParseFloat(refFreqVal)
+		cachedTuningName = tuningVal
 	}
 
 	// Initialize cache
@@ -133,7 +119,7 @@ func NewDiapasonTab() fyne.CanvasObject {
 		refNoteEntry.SetText("A3")
 		freqInput.SetText("440")
 		middleCRadio.SetSelected("C3")
-		tuningSelect.SetSelected("Equal Temperament")
+		tuningSelect.SetText(sclres.DefaultScaleName)
 		updateCache()
 		if table != nil {
 			table.Refresh()
@@ -154,17 +140,21 @@ func NewDiapasonTab() fyne.CanvasObject {
 			midiNote := id.Row
 
 			// Use cached values for performance (updated only when bindings change)
-			// Calculate frequency: freq = refFreq * 2^((thisMidi - refMidi)/12)
-			semitones := float64(midiNote - cachedRefMidi)
-			hz := cachedRefHz * math.Pow(2.0, semitones/12.0)
+			// Calculate frequency using selected tuning
+			result := logic.GetFrequency(midiNote, cachedRefHz, cachedTuningName)
 
 			switch id.Col {
 			case 0:
 				l.SetText(fmt.Sprintf("%s%d", noteNames[midiNote%12], (midiNote/12)-cachedOctaveOffset))
 			case 1:
-				l.SetText(fmt.Sprintf("%.2f Hz", hz))
+				l.SetText(fmt.Sprintf("%.2f Hz", result.Frequency))
 			case 2:
-				l.SetText("+0.00")
+				// Display cents deviation from 12-TET
+				if result.Cents >= 0 {
+					l.SetText(fmt.Sprintf("+%.2f", result.Cents))
+				} else {
+					l.SetText(fmt.Sprintf("%.2f", result.Cents))
+				}
 			case 3:
 				// Show both MIDI conventions: standard (C4=60) / alternative (C3=60)
 				// MIDI values only go 0-127, show "-" for invalid values
@@ -273,7 +263,10 @@ func NewDiapasonTab() fyne.CanvasObject {
 		updateCache()
 		table.Refresh()
 	}))
-	tuning.AddListener(binding.NewDataListener(func() { table.Refresh() }))
+	tuning.AddListener(binding.NewDataListener(func() {
+		updateCache()
+		table.Refresh()
+	}))
 
 	// Build UI layout
 	return container.NewBorder(
