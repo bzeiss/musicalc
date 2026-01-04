@@ -16,6 +16,7 @@ builds:
       - linux
     goarch:
       - amd64
+    goamd64: [v3]
     ldflags:
       - -s -w
 

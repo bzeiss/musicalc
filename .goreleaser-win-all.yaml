@@ -16,6 +16,7 @@ builds:
       - CGO_LDFLAGS=-O3 -flto=auto
     goos: [windows]
     goarch: [amd64]
+    goamd64: [v3]
     ldflags:
       - -s -w -H=windowsgui
     binary: musicalc_x64
