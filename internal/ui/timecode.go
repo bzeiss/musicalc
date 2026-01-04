@@ -24,14 +24,14 @@ func NewTimecodeTab() fyne.CanvasObject {
 	// First timecode input (single field)
 	timecode1Entry := widgets.NewTimecodeEntry(false)
 
-	// Output label for first timecode (compact format)
-	timecode1Label := widget.NewLabel("00:00:00:00 (0 frames @ 30)")
+	// Output label for first timecode (frame count only)
+	timecode1Label := widget.NewLabel("(0f @ 30)")
 
 	// Second timecode input (single field)
 	timecode2Entry := widgets.NewTimecodeEntry(false)
 
-	// Output label for second timecode (compact format)
-	timecode2Label := widget.NewLabel("00:00:00:00 (0 frames @ 30)")
+	// Output label for second timecode (frame count only)
+	timecode2Label := widget.NewLabel("(0f @ 30)")
 
 	// Auto-focus Timecode 2 when Timecode 1 is complete
 	timecode1Entry.OnComplete = func() {
@@ -65,7 +65,7 @@ func NewTimecodeTab() fyne.CanvasObject {
 		result := logic.FramesToTimecode(totalFrames, format)
 
 		fpsLabel := strings.Split(fpsSelect.Selected, " ")[0]
-		timecode1Label.SetText(fmt.Sprintf("%s (%d frames @ %s)", result.Timecode, result.TotalFrames, fpsLabel))
+		timecode1Label.SetText(fmt.Sprintf("(%df @ %s)", result.TotalFrames, fpsLabel))
 	}
 
 	// Calculate second timecode from inputs
@@ -83,7 +83,7 @@ func NewTimecodeTab() fyne.CanvasObject {
 		result := logic.FramesToTimecode(totalFrames, format)
 
 		fpsLabel := strings.Split(fpsSelect.Selected, " ")[0]
-		timecode2Label.SetText(fmt.Sprintf("%s (%d frames @ %s)", result.Timecode, result.TotalFrames, fpsLabel))
+		timecode2Label.SetText(fmt.Sprintf("(%df @ %s)", result.TotalFrames, fpsLabel))
 	}
 
 	// Track previous FPS for conversion history
@@ -141,7 +141,7 @@ func NewTimecodeTab() fyne.CanvasObject {
 	}
 
 	// Add operation
-	addButton := widget.NewButton("Add", func() {
+	addButton := widget.NewButton("+", func() {
 		h1, m1, s1, f1 := timecode1Entry.GetComponents()
 		h2, m2, s2, f2 := timecode2Entry.GetComponents()
 
@@ -173,9 +173,10 @@ func NewTimecodeTab() fyne.CanvasObject {
 		// Focus Timecode 2 for next input
 		fyne.CurrentApp().Driver().CanvasForObject(timecode2Entry).Focus(timecode2Entry)
 	})
+	addButton.Importance = widget.HighImportance
 
 	// Subtract operation
-	subtractButton := widget.NewButton("Subtract", func() {
+	subtractButton := widget.NewButton("-", func() {
 		h1, m1, s1, f1 := timecode1Entry.GetComponents()
 		h2, m2, s2, f2 := timecode2Entry.GetComponents()
 
@@ -207,21 +208,37 @@ func NewTimecodeTab() fyne.CanvasObject {
 		// Focus Timecode 2 for next input
 		fyne.CurrentApp().Driver().CanvasForObject(timecode2Entry).Focus(timecode2Entry)
 	})
+	subtractButton.Importance = widget.HighImportance
+
+	// Keyboard shortcuts for +/- operations
+	handleOperationKey := func(key fyne.KeyName) {
+		switch key {
+		case fyne.KeyEqual: // + key (Shift+= on US keyboards)
+			addButton.OnTapped()
+		case fyne.KeyMinus:
+			subtractButton.OnTapped()
+		}
+	}
+	timecode1Entry.OnOperationKey = handleOperationKey
+	timecode2Entry.OnOperationKey = handleOperationKey
 
 	// Reset operation
 	resetButton := widget.NewButton("Reset", func() {
 		updating = true
-		timecode1Entry.SetText("00:00:00:00")
-		timecode2Entry.SetText("00:00:00:00")
+		timecode1Entry.SetText("")
+		timecode2Entry.SetText("")
 		historyList = []string{}
 		historyText.SetText("")
 		updating = false
 		calculateTimecode1()
 		calculateTimecode2()
+
+		// Focus Timecode 1 for next input
+		fyne.CurrentApp().Driver().CanvasForObject(timecode1Entry).Focus(timecode1Entry)
 	})
 
 	// Clear History operation
-	clearHistoryButton := widget.NewButton("Clear History", func() {
+	clearHistoryButton := widget.NewButton("Clear Hist.", func() {
 		historyList = []string{}
 		historyText.SetText("")
 	})
@@ -230,30 +247,26 @@ func NewTimecodeTab() fyne.CanvasObject {
 	calculateTimecode1()
 	calculateTimecode2()
 
-	return container.NewBorder(
+	// Create the tab container
+	tabContainer := container.NewBorder(
 		container.NewVBox(
-			widget.NewLabelWithStyle("Timecode 1", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+			widget.NewLabelWithStyle("Timecode Calculator", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 			widget.NewSeparator(),
 			container.NewGridWithColumns(2,
-				widget.NewLabel("HH:MM:SS:FF:"),
 				timecode1Entry,
+				timecode1Label,
 			),
-			timecode1Label,
-			widget.NewLabelWithStyle("Timecode 2", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-			widget.NewSeparator(),
 			container.NewGridWithColumns(2,
-				widget.NewLabel("HH:MM:SS:FF:"),
 				timecode2Entry,
+				timecode2Label,
 			),
-			timecode2Label,
-			widget.NewSeparator(),
 			container.NewGridWithColumns(2,
-				widget.NewLabel("FPS Format:"),
-				fpsSelect,
-			),
-			container.NewGridWithColumns(4,
 				addButton,
 				subtractButton,
+			),
+			widget.NewSeparator(),
+			container.NewGridWithColumns(3,
+				fpsSelect,
 				resetButton,
 				clearHistoryButton,
 			),
@@ -264,4 +277,6 @@ func NewTimecodeTab() fyne.CanvasObject {
 		nil,           // right
 		historyScroll, // center - will expand to fill remaining space
 	)
+
+	return tabContainer
 }
