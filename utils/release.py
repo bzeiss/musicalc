@@ -159,16 +159,32 @@ def main():
     print("Git Workflow")
     print("═" * 50)
     
-    # Stage and commit changes
+    # Stage files
     if not run_command("git add VERSION musicalc.iss go.mod go.sum", project_root, "Staging files"):
         sys.exit(1)
     
-    if not run_command(f'git commit -m "{commit_message}"', project_root, "Committing changes"):
-        sys.exit(1)
+    # Check if there are changes to commit
+    try:
+        result = subprocess.run(
+            "git diff --cached --quiet",
+            cwd=project_root,
+            shell=True
+        )
+        has_changes = result.returncode != 0
+    except subprocess.CalledProcessError:
+        has_changes = True
     
-    # Push commits
-    if not run_command("git push", project_root, "Pushing commits to origin"):
-        sys.exit(1)
+    # Commit and push if there are changes
+    if has_changes:
+        if not run_command(f'git commit -m "{commit_message}"', project_root, "Committing changes"):
+            sys.exit(1)
+        
+        # Push commits
+        if not run_command("git push", project_root, "Pushing commits to origin"):
+            sys.exit(1)
+    else:
+        print("\n→ No changes to commit (version unchanged)")
+        print("✓ Skipping commit step")
     
     # Create and push tag
     tag_name = f"{new_version}"
