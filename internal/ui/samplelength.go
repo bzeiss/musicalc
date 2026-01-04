@@ -34,16 +34,21 @@ func NewSampleLengthTab() fyne.CanvasObject {
 	}
 
 	// Sample rate selector (callback will be set after calcFromTempo is defined)
-	sampleRateSelect := widget.NewSelect(sampleRates, nil)
-	sampleRateSelect.SetSelected("44100")
+	sampleRateSelect := widget.NewSelectEntry(sampleRates)
+	sampleRateSelect.SetText("44100")
+	sampleRateSelect.PlaceHolder = "Sample Rate"
 
 	// Beats input
 	beatsInput := widget.NewEntry()
+	beatsInput.PlaceHolder = "Beats"
 
 	// Bidirectional input/output fields
 	samplesEntry := widget.NewEntry()
+	samplesEntry.PlaceHolder = "Length in samples"
 	msEntry := widget.NewEntry()
+	msEntry.PlaceHolder = "Length in ms"
 	tempoEntry := widget.NewEntry()
+	tempoEntry.PlaceHolder = "Tempo"
 
 	// Flag to prevent circular updates
 	updating := false
@@ -58,7 +63,7 @@ func NewSampleLengthTab() fyne.CanvasObject {
 		updating = true
 		_ = sampleRate.Set("44100")
 		_ = beats.Set("4")
-		tempoEntry.SetText("120.00")
+		tempoEntry.SetText("120")
 		updating = false
 		calcFromTempo()
 	}
@@ -79,7 +84,12 @@ func NewSampleLengthTab() fyne.CanvasObject {
 		if bpm > 0 && sr > 0 {
 			res := logic.GetSampleData(sr, bpm, bt)
 			samplesEntry.SetText(fmt.Sprintf("%d", res.Samples))
-			msEntry.SetText(fmt.Sprintf("%.2f", res.MS))
+			// Format ms: omit .00 suffix if whole number
+			if res.MS == float64(int(res.MS)) {
+				msEntry.SetText(fmt.Sprintf("%d", int(res.MS)))
+			} else {
+				msEntry.SetText(fmt.Sprintf("%.2f", res.MS))
+			}
 		}
 	}
 
@@ -99,8 +109,18 @@ func NewSampleLengthTab() fyne.CanvasObject {
 		if samples > 0 && sr > 0 && bt > 0 {
 			ms := (samples / sr) * 1000.0
 			bpm := (60.0 / (ms / 1000.0)) * bt
-			msEntry.SetText(fmt.Sprintf("%.2f", ms))
-			tempoEntry.SetText(fmt.Sprintf("%.2f", bpm))
+			// Format ms: omit .00 suffix if whole number
+			if ms == float64(int(ms)) {
+				msEntry.SetText(fmt.Sprintf("%d", int(ms)))
+			} else {
+				msEntry.SetText(fmt.Sprintf("%.2f", ms))
+			}
+			// Format bpm: omit .00 suffix if whole number
+			if bpm == float64(int(bpm)) {
+				tempoEntry.SetText(fmt.Sprintf("%d", int(bpm)))
+			} else {
+				tempoEntry.SetText(fmt.Sprintf("%.2f", bpm))
+			}
 		}
 	}
 
@@ -121,7 +141,12 @@ func NewSampleLengthTab() fyne.CanvasObject {
 			samples := int((ms / 1000.0) * sr)
 			bpm := (60.0 / (ms / 1000.0)) * bt
 			samplesEntry.SetText(fmt.Sprintf("%d", samples))
-			tempoEntry.SetText(fmt.Sprintf("%.2f", bpm))
+			// Format bpm: omit .00 suffix if whole number
+			if bpm == float64(int(bpm)) {
+				tempoEntry.SetText(fmt.Sprintf("%d", int(bpm)))
+			} else {
+				tempoEntry.SetText(fmt.Sprintf("%.2f", bpm))
+			}
 		}
 	}
 
@@ -142,40 +167,42 @@ func NewSampleLengthTab() fyne.CanvasObject {
 	}
 
 	// Initialize values on startup
-	tempoEntry.SetText("120.00")
+	tempoEntry.SetText("120")
 	calcFromTempo()
 
 	// Reset button
-	resetBtn := widget.NewButton("↻", func() {
+	resetBtn := widget.NewButton("↻ Reset", func() {
 		resetToDefaults()
-		sampleRateSelect.SetSelected("44100")
+		sampleRateSelect.SetText("44100")
 		beatsInput.SetText("4")
 	})
 
 	return container.NewVBox(
+		widget.NewLabelWithStyle("Sample Length / Timestretching", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		widget.NewSeparator(),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Sample Rate:"),
+			widget.NewLabel("Sample Rate"),
 			sampleRateSelect,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Beats:"),
+			widget.NewLabel("Beats"),
 			beatsInput,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Reset:"),
+			widget.NewLabel(""),
 			resetBtn,
 		),
 		widget.NewSeparator(),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Length in samples:"),
+			widget.NewLabel("Length in samples"),
 			samplesEntry,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Length in ms:"),
+			widget.NewLabel("Length in ms"),
 			msEntry,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Tempo:"),
+			widget.NewLabel("Tempo"),
 			tempoEntry,
 		),
 	)
