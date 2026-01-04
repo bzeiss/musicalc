@@ -57,15 +57,22 @@ def update_inno_setup(project_root, new_version):
     
     # Update #define MyAppVersion
     pattern = r'(#define MyAppVersion\s+")[^"]+(")' 
-    replacement = r'\g<1>' + new_version + r'\g<2>'
-    new_content = re.sub(pattern, replacement, content)
     
-    if new_content == content:
+    # Check if pattern exists in file
+    if not re.search(pattern, content):
         print(f"✗ Error: Could not find version pattern in {iss_file}")
         return False
     
-    iss_file.write_text(new_content, encoding='utf-8')
-    print(f"✓ Updated musicalc.iss: {new_version}")
+    replacement = r'\g<1>' + new_version + r'\g<2>'
+    new_content = re.sub(pattern, replacement, content)
+    
+    # Only write if content changed
+    if new_content != content:
+        iss_file.write_text(new_content, encoding='utf-8')
+        print(f"✓ Updated musicalc.iss: {new_version}")
+    else:
+        print(f"✓ musicalc.iss already at version: {new_version}")
+    
     return True
 
 
