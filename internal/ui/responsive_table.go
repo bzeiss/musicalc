@@ -70,9 +70,8 @@ func (rr *responsiveTableRenderer) Destroy() {}
 // updateColumnWidths recalculates and applies proportional column widths
 func (r *ResponsiveTable) updateColumnWidths(width float32) {
 	availableWidth := width - r.padding
-	if availableWidth < r.minWidth {
-		availableWidth = r.minWidth
-	}
+	// Don't enforce minWidth - allow columns to shrink to fit available space
+	// This prevents horizontal scrolling when container is narrower than minWidth
 
 	for i, proportion := range r.columnProportions {
 		columnWidth := availableWidth * proportion
