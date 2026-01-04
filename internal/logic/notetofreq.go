@@ -108,9 +108,9 @@ func loadTuning(tuningName string, refFreq float64, refMidi int) scala.Tuning {
 		return nil
 	}
 
-	// Use StartScaleOnAndTuneNoteTo with scale starting on middle C (MIDI 60)
-	// and tuning the reference MIDI note to the reference frequency
-	kbm, err := scala.KeyboardMappingStartScaleOnAndTuneNoteTo(60, refMidi, refFreq)
+	// Use StartScaleOnAndTuneNoteTo with scale starting on the reference note itself
+	// This matches how MusicMath interprets the scale mapping
+	kbm, err := scala.KeyboardMappingStartScaleOnAndTuneNoteTo(refMidi, refMidi, refFreq)
 	if err != nil {
 		return nil
 	}
