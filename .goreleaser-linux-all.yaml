@@ -10,7 +10,7 @@ builds:
   - id: linux-amd64
     env:
       - CGO_ENABLED=1
-      - CGO_CFLAGS=-O3 -flto=auto -march=x86-64-v3
+      - CGO_CFLAGS=-O3 -flto=auto
       - CGO_LDFLAGS=-O3 -flto=auto
     goos:
       - linux
