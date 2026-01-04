@@ -5,7 +5,9 @@
 1. **Select frame rate** from the dropdown (23.976, 24, 25, 29.97, 30, etc.)
 2. **Enter timecode values** in Hours:Minutes:Seconds:Frames format
    - Fields start empty - just click and type
-   - Tab through fields for quick data entry
+   - **Right-justified entry**: Type digits and they fill from right to left (frames → seconds → minutes → hours)
+   - **Dot shorthand**: Press `.` (period) to quickly insert `00` - great for fast entry (e.g., `1.` = 1 second)
+   - **Backspace** removes the last entered digit
    - Empty fields are treated as 0 in calculations
 
 3. **Perform calculations**:
