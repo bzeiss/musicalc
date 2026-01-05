@@ -8,6 +8,13 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+//go:embed alignmentdelay.svg
+var resourceAlignmentdelaySvgData []byte
+var resourceAlignmentdelaySvg = &fyne.StaticResource{
+	StaticName:    "alignmentdelay.svg",
+	StaticContent: resourceAlignmentdelaySvgData,
+}
+
 //go:embed delay.svg
 var resourceDelaySvgData []byte
 var resourceDelaySvg = &fyne.StaticResource{

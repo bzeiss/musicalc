@@ -103,11 +103,12 @@
    export CGO_CFLAGS="-O3 -flto=auto -march=x86-64-v3"
    export CGO_LDFLAGS="-O3 -flto=auto"
    export CGO_ENABLED=1
+   export CC=gcc
+   export CXX=g++
    export GOOS=linux
    export GOARCH=amd64
    go build -ldflags="-s -w" -o musicalc_linux_amd64
    ```
-
 7. **Build the application for Linux ARM64**
    ```bash
    export CGO_CFLAGS="-O3 -flto=auto -march=armv8.4-a+crc+crypto -fomit-frame-pointer"
@@ -150,14 +151,7 @@
    export ANDROID_HOME=/path/to/your/android-sdk
    export ANDROID_SDK_ROOT=$ANDROID_HOME
    export PATH=$PATH:${ANDROID_HOME}/cmdline-tools/latest/bin
-   export CGO_ENABLED=1
-   export CGO_CFLAGS="-O3 -flto=auto -march=armv8-a+crc+crypto"
-   export CGO_LDFLAGS="-O3 -flto=auto -Wl -z max-page-size=16384"
-   export GOFLAGS="-ldflags=-s -w"
-   fyne package --os android/arm64 --id com.github.bzeiss --release -icon icons/appicon.png
-   mv musicalc.apk dist/ && cd dist && zipalign -v -P 16 4 musicalc.apk musicalc-aligned.apk
-   zipalign -c -v -P 16 4 musicalc-aligned.apk # optional, just a verification
-   unzip -p musicalc-aligned.apk lib/arm64-v8a/libmusicalc.so > libmusicalc.so && objdump -p libmusicalc.so | grep LOAD && rm libmusicalc.so #check alignment, should be 2**14
+   ./build-android.sh
    ```
 
    For the Android SDK and NDK, you can use the Android Studio SDK Manager to install them.

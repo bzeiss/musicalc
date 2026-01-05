@@ -299,8 +299,6 @@ func NewTempoChangeTab() fyne.CanvasObject {
 	calcFromNewTempo()
 
 	return container.NewVBox(
-		widget.NewLabelWithStyle("Tempo Change / Time Stretching", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		widget.NewSeparator(),
 		container.NewGridWithColumns(2,
 			widget.NewLabel("Original Tempo"),
 			originalTempoEntry,
@@ -333,11 +331,11 @@ func NewTempoChangeTab() fyne.CanvasObject {
 		),
 		widget.NewSeparator(),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Transpose Semis (50 Cents)"),
+			widget.NewLabel("Transpose Semis (50¢n)"),
 			semitones50Label,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Transpose Cents (50 Cents)"),
+			widget.NewLabel("Transpose Cents (50¢n)"),
 			cents50Label,
 		),
 	)

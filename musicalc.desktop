@@ -6,3 +6,4 @@ Exec=/usr/local/bin/musicalc
 Icon=musicalc
 Terminal=false
 Categories=Utility;Audio;
+StartupWMClass=MusiCalc v0.8.6

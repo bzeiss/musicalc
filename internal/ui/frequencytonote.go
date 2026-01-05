@@ -150,8 +150,6 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 	calculateFromFrequency()
 
 	return container.NewVBox(
-		widget.NewLabelWithStyle("Frequency to Note", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		widget.NewSeparator(),
 		container.NewGridWithColumns(2,
 			widget.NewLabel("Frequency (Hz)"),
 			frequencyEntry,
@@ -179,11 +177,11 @@ func NewFrequencyToNoteTab() fyne.CanvasObject {
 		),
 		widget.NewSeparator(),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Note (50 Cents)"),
+			widget.NewLabel("Note (50¢n)"),
 			note50Label,
 		),
 		container.NewGridWithColumns(2,
-			widget.NewLabel("Cents (50 Cents)"),
+			widget.NewLabel("Cents (50¢n)"),
 			cents50Label,
 		),
 	)

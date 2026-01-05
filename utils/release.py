@@ -76,6 +76,43 @@ def update_inno_setup(project_root, new_version):
     return True
 
 
+def update_desktop_files(project_root, new_version):
+    """Update version in .desktop files (StartupWMClass field)"""
+    desktop_files = [
+        project_root / "musicalc.desktop",
+        project_root / "musicalc-pkg.desktop"
+    ]
+    
+    success = True
+    for desktop_file in desktop_files:
+        if not desktop_file.exists():
+            print(f"⚠ Warning: {desktop_file.name} not found, skipping")
+            continue
+        
+        content = desktop_file.read_text(encoding='utf-8')
+        
+        # Update StartupWMClass=MusiCalc v0.8.4
+        pattern = r'(StartupWMClass=MusiCalc v)[0-9.]+'
+        
+        # Check if pattern exists in file
+        if not re.search(pattern, content):
+            print(f"✗ Error: Could not find StartupWMClass pattern in {desktop_file.name}")
+            success = False
+            continue
+        
+        replacement = r'\g<1>' + new_version
+        new_content = re.sub(pattern, replacement, content)
+        
+        # Only write if content changed
+        if new_content != content:
+            desktop_file.write_text(new_content, encoding='utf-8')
+            print(f"✓ Updated {desktop_file.name}: {new_version}")
+        else:
+            print(f"✓ {desktop_file.name} already at version: {new_version}")
+    
+    return success
+
+
 def validate_version(version_str):
     """Validate version string format (e.g., 0.8.3)"""
     pattern = r'^\d+\.\d+\.\d+$'
@@ -147,6 +184,11 @@ def main():
     if not update_inno_setup(project_root, new_version):
         sys.exit(1)
     
+    # Update .desktop files
+    print()
+    if not update_desktop_files(project_root, new_version):
+        sys.exit(1)
+    
     # Ask for commit message
     print()
     commit_message = input("Enter release commit message: ").strip()
@@ -160,7 +202,7 @@ def main():
     print("═" * 50)
     
     # Stage files
-    if not run_command("git add VERSION musicalc.iss go.mod go.sum", project_root, "Staging files"):
+    if not run_command("git add VERSION musicalc.iss musicalc.desktop musicalc-pkg.desktop go.mod go.sum", project_root, "Staging files"):
         sys.exit(1)
     
     # Check if there are changes to commit

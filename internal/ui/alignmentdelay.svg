@@ -1,0 +1,28 @@
+<svg width="24" height="24" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="100" height="100" rx="12" fill="#171718" />
+    
+    <!-- Three microphones at different distances -->
+    <g fill="#5B43E7">
+        <!-- Close mic -->
+        <circle cx="20" cy="50" r="6" />
+        <rect x="17" y="35" width="6" height="15" rx="2" />
+        
+        <!-- Mid mic -->
+        <circle cx="45" cy="50" r="5" opacity="0.6" />
+        <rect x="43" y="38" width="4" height="12" rx="1.5" opacity="0.6" />
+        
+        <!-- Far mic (reference) -->
+        <circle cx="70" cy="50" r="4" opacity="0.3" />
+        <rect x="68" y="40" width="4" height="10" rx="1.5" opacity="0.3" />
+    </g>
+    
+    <!-- Waveform/alignment lines -->
+    <g stroke="#FFB74D" stroke-width="2" fill="none">
+        <path d="M 20,65 Q 25,60 30,65 T 40,65" />
+        <path d="M 45,70 Q 50,65 55,70 T 65,70" opacity="0.6" />
+        <path d="M 70,75 Q 75,70 80,75 T 90,75" opacity="0.3" />
+    </g>
+    
+    <!-- Delay/distance indicators -->
+    <line x1="20" y1="80" x2="70" y2="80" stroke="#E0E0E0" stroke-width="1.5" stroke-dasharray="2,2" />
+</svg>

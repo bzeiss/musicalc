@@ -7,16 +7,13 @@ before:
 #    - go mod tidy
 
 builds:
-  #  linux builds currently require glibc 2.39+, todo: use zig cc for 2.27 compatibility
   - id: linux-amd64
     env:
       - CGO_ENABLED=1
-      - CGO_CFLAGS=-O3 -flto=auto -march=x86-64-v3
+      - CGO_CFLAGS=-O3 -flto=auto -march=haswell
       - CGO_LDFLAGS=-O3 -flto=auto
-      - CC=gcc
-      - CXX=g++
-      # export CC="zig cc -target x86_64-linux-gnu.2.27"
-      # export CXX="zig c++ -target x86_64-linux-gnu.2.27"
+      - CC=x86_64-linux-gnu-gcc
+      - CXX=x86_64-linux-gnu-g++
     goos:
       - linux
     goarch:
@@ -24,20 +21,6 @@ builds:
     goamd64: [v3]
     ldflags:
       - -s -w
-
-  - id: linux-arm64
-    env:
-      - CGO_ENABLED=1
-      - CC=aarch64-linux-gnu-gcc
-      - PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig
-      - CGO_CFLAGS=-O3 -flto=auto -march=armv8.4-a+crc+crypto -fomit-frame-pointer
-      - CGO_LDFLAGS=-O3 -flto=auto -Wl,--gc-sections
-    goos:
-      - linux
-    goarch:
-      - arm64
-    ldflags:
-      - -s -w      
   
 # This creates the .tar.gz bundle
 archives:
@@ -65,4 +48,3 @@ nfpms:
       # This creates the Start Menu entry automatically (uses /usr/bin path)
       - src: musicalc-pkg.desktop
         dst: /usr/share/applications/musicalc.desktop
-        type: config

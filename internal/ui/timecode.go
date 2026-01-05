@@ -281,8 +281,6 @@ func NewTimecodeTab() fyne.CanvasObject {
 	// Create the tab container
 	tabContainer := container.NewBorder(
 		container.NewVBox(
-			widget.NewLabelWithStyle("Timecode Calculator", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-			widget.NewSeparator(),
 			container.NewGridWithColumns(2,
 				timecode1Entry,
 				timecode1Label,

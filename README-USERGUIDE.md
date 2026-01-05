@@ -108,6 +108,39 @@
 - You want a 4-bar loop at 140 BPM → Calculator shows you need 151,543 samples at 44.1kHz
 - You need to know what tempo your found sample is → Enter its sample count and get the BPM
 
+## Multi-Mic Alignment Delay
+
+This calculator helps you time-align multiple microphones (close mics) to a single **reference** microphone (usually the furthest mic, e.g. a room mic). It computes how much delay to add to each close mic so that all transients arrive at the DAW at the same time.
+
+1. **Set sample rate**
+   - Choose your DAW/project sample rate (e.g. 44100, 48000, 96000).
+
+2. **Set temperature**
+   - Enter the room temperature and select **C** or **F**.
+   - This is used to estimate speed of sound.
+
+3. **Set the reference distance**
+   - Enter the distance to your furthest microphone (the one you align everything to).
+   - Choose **m** or **ft**.
+
+4. **Add target microphones**
+   - Enter a mic name (pick from the dropdown or type a custom one).
+   - Enter its distance.
+   - Choose **m** or **ft**.
+   - Press **+** to add it to the table.
+
+5. **Read results**
+   - Each row shows the mic distance, plus the required delay in:
+     - **milliseconds (ms)**
+     - **samples**
+
+6. **Remove microphones**
+   - Click the trash icon in the Actions column to remove a mic.
+
+**Notes / edge cases**:
+- If a mic is **further than the reference**, the delay is shown as **N/A** because you cannot add a positive delay to make a further mic arrive earlier.
+- All values update automatically when you change temperature, units, sample rate, reference distance, or add/remove microphones.
+
 ## Tempo Change
 
 1. **Set original tempo** of your audio material

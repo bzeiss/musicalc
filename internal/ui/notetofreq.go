@@ -306,8 +306,6 @@ func NewDiapasonTab() fyne.CanvasObject {
 	// Build UI layout
 	return container.NewBorder(
 		container.NewVBox(
-			widget.NewLabelWithStyle("Note to Frequency", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-			widget.NewSeparator(),
 			container.NewGridWithColumns(2,
 				widget.NewLabel("Reference"),
 				refNoteEntry,

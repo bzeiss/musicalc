@@ -108,8 +108,6 @@ func NewTempoTab() fyne.CanvasObject {
 
 	return container.NewBorder(
 		container.NewVBox(
-			widget.NewLabelWithStyle("Tempo to Delay", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-			widget.NewSeparator(),
 			input,
 			widget.NewSeparator(),
 		),
