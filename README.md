@@ -6,8 +6,15 @@ This project is heavily inspired by [MusicMath](https://dev.laurentcolson.com/mu
 
 <table style="width: 100%;" border="0">
   <tr>
-    <td><img width="449" height="678" alt="image" src="https://github.com/user-attachments/assets/6ebfc867-8479-4dfc-aa3a-e817b62c176e" /></td>
-    <td><img width="446" height="677" alt="image" src="https://github.com/user-attachments/assets/d50078af-9464-4890-962c-2da1d016dd0e" /></td>
+    <td>
+      <img width="450" height="682" alt="image" src="https://github.com/user-attachments/assets/8b6ecfaf-d865-4699-9926-d56f9806eb15" />
+    </td>
+    <td>
+      <img width="450" height="679" alt="image" src="https://github.com/user-attachments/assets/0f95847c-aa18-463b-a47b-81f80bf3f957" />
+    </td>
+    <td>
+      <img width="450" height="679" alt="image" src="https://github.com/user-attachments/assets/2db75878-294e-425c-9ef3-1086adba30a7" />
+    </td>
   </tr>
 </table>
 
