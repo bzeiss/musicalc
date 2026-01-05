@@ -7,6 +7,7 @@ before:
 #    - go mod tidy
 
 builds:
+  #  linux builds currently require glibc 2.39+, todo: use zig cc for 2.27 compatibility
   - id: linux-amd64
     env:
       - CGO_ENABLED=1
@@ -14,6 +15,8 @@ builds:
       - CGO_LDFLAGS=-O3 -flto=auto
       - CC=gcc
       - CXX=g++
+      # export CC="zig cc -target x86_64-linux-gnu.2.27"
+      # export CXX="zig c++ -target x86_64-linux-gnu.2.27"
     goos:
       - linux
     goarch:

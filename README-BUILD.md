@@ -152,7 +152,7 @@
    export PATH=$PATH:${ANDROID_HOME}/cmdline-tools/latest/bin
    export CGO_ENABLED=1
    export CGO_CFLAGS="-O3 -flto=auto -march=armv8-a+crc+crypto"
-   export CGO_LDFLAGS="-O3,-flto=auto,-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384"
+   export CGO_LDFLAGS="-O3 -flto=auto -Wl -z max-page-size=16384"
    export GOFLAGS="-ldflags=-s -w"
    fyne package --os android/arm64 --id com.github.bzeiss --release -icon icons/appicon.png
    mv musicalc.apk dist/ && cd dist && zipalign -v -P 16 4 musicalc.apk musicalc-aligned.apk
