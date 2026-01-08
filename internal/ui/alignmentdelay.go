@@ -5,11 +5,118 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"musicalc/internal/logic"
 )
+
+type compactIconButton struct {
+	widget.BaseWidget
+	icon     fyne.Resource
+	onTapped func()
+}
+
+type tightVBoxLayout struct{}
+
+type cardLine1Layout struct{}
+
+func (l *tightVBoxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+	y := float32(0)
+	for _, o := range objects {
+		if o == nil || !o.Visible() {
+			continue
+		}
+		h := o.MinSize().Height
+		o.Move(fyne.NewPos(0, y))
+		o.Resize(fyne.NewSize(size.Width, h))
+		y += h
+	}
+}
+
+func (l *tightVBoxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	w := float32(0)
+	h := float32(0)
+	for _, o := range objects {
+		if o == nil || !o.Visible() {
+			continue
+		}
+		ms := o.MinSize()
+		if ms.Width > w {
+			w = ms.Width
+		}
+		h += ms.Height
+	}
+	return fyne.NewSize(w, h)
+}
+
+func (l *cardLine1Layout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+	if len(objects) < 2 {
+		return
+	}
+	left := objects[0]
+	right := objects[1]
+
+	rightMS := right.MinSize()
+	leftMS := left.MinSize()
+
+	leftW := size.Width - rightMS.Width
+	if leftW < 0 {
+		leftW = 0
+	}
+
+	leftY := (size.Height - leftMS.Height) / 2
+	if leftY < 0 {
+		leftY = 0
+	}
+	left.Move(fyne.NewPos(0, leftY))
+	left.Resize(fyne.NewSize(leftW, leftMS.Height))
+
+	rightY := (size.Height - rightMS.Height) / 2
+	if rightY < 0 {
+		rightY = 0
+	}
+	right.Move(fyne.NewPos(size.Width-rightMS.Width, rightY))
+	right.Resize(rightMS)
+}
+
+func (l *cardLine1Layout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	if len(objects) < 2 {
+		return fyne.NewSize(0, 0)
+	}
+	leftMS := objects[0].MinSize()
+	rightMS := objects[1].MinSize()
+	h := leftMS.Height
+	if rightMS.Height > h {
+		h = rightMS.Height
+	}
+	return fyne.NewSize(leftMS.Width+rightMS.Width, h)
+}
+
+func newCompactIconButton(icon fyne.Resource, onTapped func()) *compactIconButton {
+	b := &compactIconButton{icon: icon, onTapped: onTapped}
+	b.ExtendBaseWidget(b)
+	return b
+}
+
+func (b *compactIconButton) MinSize() fyne.Size {
+	return fyne.NewSize(16, 16)
+}
+
+func (b *compactIconButton) Tapped(*fyne.PointEvent) {
+	if b.onTapped != nil {
+		b.onTapped()
+	}
+}
+
+func (b *compactIconButton) CreateRenderer() fyne.WidgetRenderer {
+	img := canvas.NewImageFromResource(b.icon)
+	img.FillMode = canvas.ImageFillContain
+	return widget.NewSimpleRenderer(img)
+}
 
 // NewAlignmentDelayTab creates the Multi-Mic Alignment Delay calculator
 func NewAlignmentDelayTab() fyne.CanvasObject {
@@ -42,10 +149,10 @@ func NewAlignmentDelayTab() fyne.CanvasObject {
 	// Common microphone positions for dropdown
 	commonMicPositions := []string{
 		"Kick In", "Kick Out", "Snare Top", "Snare Bottom",
-		"Hi-Hat", "Tom 1", "Tom 2", "Floor Tom",
-		"Overhead L", "Overhead R", "Room L", "Room R",
-		"Vocal", "Guitar Amp", "Bass Amp",
-		"Piano L", "Piano R", "Strings", "Brass", "Ambience",
+		"Hi-Hat", "Tom 1", "Tom 2", "Tom 3", "Floor Tom",
+		"Overhead 1", "Overhead 2", "Room 1", "Room 2",
+		"Vocal", "Guitar Amp", "Guitar DI", "Bass Amp", "Bass DI",
+		"Piano 1", "Piano 2", "Strings", "Brass", "Ambience",
 	}
 
 	// Mic name as Select (dropdown only for consistent height)
@@ -54,7 +161,7 @@ func NewAlignmentDelayTab() fyne.CanvasObject {
 
 	// Target distance input
 	targetDistEntry := widget.NewEntry()
-	targetDistEntry.SetPlaceHolder("Distance to Ref.")
+	targetDistEntry.SetPlaceHolder("Dist. to Ref.")
 
 	targetUnitSelect := widget.NewSelect([]string{"m", "ft"}, nil)
 	targetUnitSelect.SetSelected("m")
@@ -72,80 +179,84 @@ func NewAlignmentDelayTab() fyne.CanvasObject {
 		return s
 	}
 
-	// Table to display microphones with sticky header
-	table := widget.NewTableWithHeaders(
-		func() (int, int) {
-			return len(calc.Mics), 4
+	var refreshTable func()
+
+	// Mobile-friendly card list (2 lines per mic)
+	cardList := widget.NewList(
+		func() int {
+			return len(calc.Mics)
 		},
 		func() fyne.CanvasObject {
-			l := widget.NewLabel("")
-			l.Truncation = fyne.TextTruncateClip
-			return l
+			nameLabel := widget.NewLabelWithStyle("", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+			nameLabel.Truncation = fyne.TextTruncateClip
+			removeIcon := newCompactIconButton(theme.DeleteIcon(), nil)
+			removeIconSlot := container.NewGridWrap(fyne.NewSize(22, 16), container.NewCenter(removeIcon))
+			line1 := container.New(&cardLine1Layout{}, nameLabel, removeIconSlot)
+
+			distLabel := widget.NewLabel("")
+			distLabel.Truncation = fyne.TextTruncateClip
+			delayLabel := widget.NewLabel("")
+			delayLabel.Alignment = fyne.TextAlignTrailing
+			delayLabel.Truncation = fyne.TextTruncateClip
+			line2 := container.NewHBox(distLabel, layout.NewSpacer(), delayLabel)
+
+			content := container.New(&tightVBoxLayout{}, line1, line2)
+			padded := container.New(layout.NewCustomPaddedLayout(2, 2, 1, 1), content)
+
+			bg := canvas.NewRectangle(theme.Color(theme.ColorNameInputBackground))
+			bg.StrokeColor = theme.Color(theme.ColorNameSeparator)
+			bg.StrokeWidth = 1
+			bg.CornerRadius = 6
+
+			return container.NewStack(bg, padded)
 		},
-		func(id widget.TableCellID, cell fyne.CanvasObject) {
-			if id.Row >= len(calc.Mics) {
+		func(id widget.ListItemID, o fyne.CanvasObject) {
+			if id < 0 || id >= len(calc.Mics) {
 				return
 			}
-			label := cell.(*widget.Label)
-			mic := calc.Mics[id.Row]
-			switch id.Col {
-			case 0:
-				label.Alignment = fyne.TextAlignLeading
-				label.SetText(mic.Name)
-			case 1:
-				label.Alignment = fyne.TextAlignLeading
-				unit := targetUnitSelect.Selected
-				label.SetText(formatTrimFloat(logic.FromMeters(mic.DistanceMeters, unit), 3) + unit)
-			case 2:
-				label.Alignment = fyne.TextAlignLeading
-				if mic.IsBeyondReference {
-					label.SetText("N/A")
-					break
-				}
-				label.SetText(formatTrimFloat(mic.DelayMS, 2) + fmt.Sprintf("ms / %d smp", mic.DelaySamples))
-			case 3:
-				label.Alignment = fyne.TextAlignCenter
-				label.SetText("🗑️")
+			mic := calc.Mics[id]
+			outer := o.(*fyne.Container)
+			padded := outer.Objects[1].(*fyne.Container)
+			content := padded.Objects[0].(*fyne.Container)
+
+			line1 := content.Objects[0].(*fyne.Container)
+			nameLabel := line1.Objects[0].(*widget.Label)
+			removeIconSlot := line1.Objects[1].(*fyne.Container)
+			removeIconCenter := removeIconSlot.Objects[0].(*fyne.Container)
+			removeIcon := removeIconCenter.Objects[0].(*compactIconButton)
+
+			line2 := content.Objects[1].(*fyne.Container)
+			distLabel := line2.Objects[0].(*widget.Label)
+			delayLabel := line2.Objects[2].(*widget.Label)
+
+			nameLabel.SetText(mic.Name)
+			unit := targetUnitSelect.Selected
+			distLabel.SetText(formatTrimFloat(logic.FromMeters(mic.DistanceMeters, unit), 3) + unit)
+			if mic.IsBeyondReference {
+				delayLabel.SetText("N/A")
+			} else {
+				delayLabel.SetText(formatTrimFloat(mic.DelayMS, 2) + fmt.Sprintf("ms / %d smp", mic.DelaySamples))
 			}
-			label.TextStyle = fyne.TextStyle{Bold: false}
+
+			rowID := id
+			removeIcon.onTapped = func() {
+				if rowID >= 0 && rowID < len(calc.Mics) {
+					calc.RemoveMicAt(rowID)
+					if refreshTable != nil {
+						refreshTable()
+					}
+				}
+			}
 		},
 	)
 
-	// Configure sticky header
-	table.CreateHeader = func() fyne.CanvasObject {
-		l := widget.NewLabel("")
-		l.Truncation = fyne.TextTruncateClip
-		return l
-	}
-	table.UpdateHeader = func(id widget.TableCellID, o fyne.CanvasObject) {
-		label := o.(*widget.Label)
-		if id.Col == -1 {
-			label.SetText("")
-			return
-		}
-		label.TextStyle = fyne.TextStyle{Bold: true}
-		if id.Col == 3 {
-			label.Alignment = fyne.TextAlignCenter
-			label.SetText("🛠️")
-			return
-		}
-		label.Alignment = fyne.TextAlignLeading
-		headers := []string{"Name", "Distance", "Delay", "Actions"}
-		label.SetText(headers[id.Col])
-	}
-
-	table.SetColumnWidth(0, 120)
-	table.SetColumnWidth(1, 100)
-	table.SetColumnWidth(2, 180)
-	table.SetColumnWidth(3, 60)
-
-	// Refresh table data
-	refreshTable := func() {
+	// Refresh data
+	refreshTable = func() {
 		calc.SetTemperature(logic.ParseFloat(tempEntry.Text), tempUnitSelect.Selected)
 		calc.SetSampleRateLabel(sampleRateSelect.Selected)
 		calc.SetReferenceDistance(logic.ParseFloat(refDistEntry.Text), refUnitSelect.Selected)
 		calc.Recalculate()
-		table.Refresh()
+		cardList.Refresh()
 	}
 
 	// Add microphone button with emphasis
@@ -167,16 +278,6 @@ func NewAlignmentDelayTab() fyne.CanvasObject {
 		refreshTable()
 	})
 
-	// Handle table clicks for remove
-	table.OnSelected = func(id widget.TableCellID) {
-		if id.Row >= 0 && id.Col == 3 && id.Row < len(calc.Mics) {
-			// Remove microphone
-			calc.RemoveMicAt(id.Row)
-			refreshTable()
-		}
-		table.UnselectAll()
-	}
-
 	// Recalculate when temperature or reference changes
 	tempEntry.OnChanged = func(string) { refreshTable() }
 	tempUnitSelect.OnChanged = func(string) { refreshTable() }
@@ -184,14 +285,6 @@ func NewAlignmentDelayTab() fyne.CanvasObject {
 	refUnitSelect.OnChanged = func(string) { refreshTable() }
 	sampleRateSelect.OnChanged = func(string) { refreshTable() }
 	targetUnitSelect.OnChanged = func(string) { refreshTable() }
-
-	// Create responsive table wrapper for proper column sizing
-	responsiveTableWidget := NewResponsiveTable(
-		table,
-		[]float32{0.30, 0.20, 0.40, 0.10}, // Column proportions: Name, Distance, Delay, Remove
-		100,                               // min width
-		60,                                // padding
-	)
 
 	// Compact layout with minimal widths
 	tempEntry.Resize(fyne.NewSize(80, tempEntry.MinSize().Height))
@@ -246,17 +339,15 @@ func NewAlignmentDelayTab() fyne.CanvasObject {
 		),
 	)
 
-	// Use Border layout to make table stretch vertically
-	content := container.NewBorder(
-		container.NewVBox(
-			topRow,
-			widget.NewSeparator(),
-			micRow,
-			// widget.NewSeparator(),
-		),
-		nil, nil, nil,
-		responsiveTableWidget,
+	topControls := container.NewVBox(
+		topRow,
+		widget.NewSeparator(),
+		micRow,
 	)
 
-	return content
+	return container.NewBorder(
+		topControls,
+		nil, nil, nil,
+		cardList,
+	)
 }
