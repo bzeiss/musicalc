@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"io"
 	"musicalc/internal/ui"
 	"strings"
 
@@ -93,7 +94,7 @@ func main() {
 	sampleLengthTab := container.NewTabItem(sampleLengthText, ui.NewSampleLengthTab())
 	sampleLengthTab.Icon = ui.ResourceSamplelengthSvg
 
-	alignmentContent, alignmentExportCSV := ui.NewAlignmentDelayTabWithExport()
+	alignmentContent, alignmentExportCSV, alignmentImportCSV := ui.NewAlignmentDelayTabWithExport()
 	alignmentTab := container.NewTabItem(alignmentText, alignmentContent)
 	alignmentTab.Icon = ui.ResourceAlignmentdelaySvg
 
@@ -133,6 +134,30 @@ func main() {
 	// Per-tab toolbar items (empty for all calculators for now)
 	perTabToolbarItems := make([][]widget.ToolbarItem, len(allTabs))
 	perTabToolbarItems[6] = []widget.ToolbarItem{
+		widget.NewToolbarAction(theme.FolderOpenIcon(), func() {
+			d := dialog.NewFileOpen(func(rc fyne.URIReadCloser, err error) {
+				if err != nil {
+					dialog.ShowError(err, window)
+					return
+				}
+				if rc == nil {
+					return
+				}
+				defer rc.Close()
+
+				b, err := io.ReadAll(rc)
+				if err != nil {
+					dialog.ShowError(err, window)
+					return
+				}
+				if err := alignmentImportCSV(string(b)); err != nil {
+					dialog.ShowError(err, window)
+					return
+				}
+			}, window)
+			d.SetFilter(storage.NewExtensionFileFilter([]string{".csv"}))
+			d.Show()
+		}),
 		widget.NewToolbarAction(theme.DownloadIcon(), func() {
 			d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
 				if err != nil {

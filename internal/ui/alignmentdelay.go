@@ -120,11 +120,11 @@ func (b *compactIconButton) CreateRenderer() fyne.WidgetRenderer {
 
 // NewAlignmentDelayTab creates the Multi-Mic Alignment Delay calculator
 func NewAlignmentDelayTab() fyne.CanvasObject {
-	content, _ := NewAlignmentDelayTabWithExport()
+	content, _, _ := NewAlignmentDelayTabWithExport()
 	return content
 }
 
-func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)) {
+func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error), func(string) error) {
 	// Temperature input
 	tempEntry := widget.NewEntry()
 	//tempEntry.SetText("22")
@@ -278,6 +278,66 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 		return logic.AlignmentDelayExportCSV(calc, unit, roomTemp, roomTempUnit, refDist, refDistUnit)
 	}
 
+	importCSV := func(csvData string) error {
+		res, err := logic.AlignmentDelayImportCSV(csvData)
+		if err != nil {
+			return err
+		}
+
+		sampleRateLabel := fmt.Sprintf("%d", res.SampleRate)
+		foundRate := false
+		for _, opt := range sampleRateSelect.Options {
+			if opt == sampleRateLabel {
+				foundRate = true
+				break
+			}
+		}
+		if foundRate {
+			sampleRateSelect.SetSelected(sampleRateLabel)
+		} else {
+			sampleRateSelect.SetSelected("48000")
+		}
+
+		tempUnit := strings.ToUpper(strings.TrimSpace(res.RoomTempUnit))
+		if tempUnit == "F" {
+			tempUnitSelect.SetSelected("F")
+		} else {
+			tempUnitSelect.SetSelected("C")
+		}
+		tempEntry.SetText(formatTrimFloat(res.RoomTemp, 2))
+
+		refUnit := strings.ToLower(strings.TrimSpace(res.RefDistUnit))
+		if refUnit == "ft" {
+			refUnitSelect.SetSelected("ft")
+		} else {
+			refUnitSelect.SetSelected("m")
+		}
+		refDistEntry.SetText(formatTrimFloat(res.RefDist, 3))
+
+		distUnit := strings.ToLower(strings.TrimSpace(res.DistUnit))
+		if distUnit == "ft" {
+			targetUnitSelect.SetSelected("ft")
+		} else {
+			targetUnitSelect.SetSelected("m")
+		}
+
+		calc.Mics = nil
+		for _, mic := range res.Mics {
+			u := strings.ToLower(strings.TrimSpace(mic.DistUnit))
+			if u != "ft" {
+				u = "m"
+			}
+			calc.AddMic(mic.Name, mic.Dist, u)
+		}
+
+		micNameSelect.SetText("")
+		targetDistEntry.SetText("")
+		if refreshTable != nil {
+			refreshTable()
+		}
+		return nil
+	}
+
 	// Add microphone button with emphasis
 	addButton := widget.NewButton("+", func() {
 		// Button handler
@@ -369,5 +429,5 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 		nil, nil, nil,
 		cardList,
 	)
-	return content, exportCSV
+	return content, exportCSV, importCSV
 }

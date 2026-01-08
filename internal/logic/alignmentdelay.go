@@ -2,6 +2,7 @@ package logic
 
 import (
 	"encoding/csv"
+	"errors"
 	"math"
 	"strconv"
 	"strings"
@@ -193,4 +194,94 @@ func AlignmentDelayExportCSV(calc *AlignmentDelayCalculator, distUnit string, ro
 		return "", err
 	}
 	return sb.String(), nil
+}
+
+type AlignmentDelayImportRow struct {
+	Name     string
+	Dist     float64
+	DistUnit string
+}
+
+type AlignmentDelayImportResult struct {
+	SampleRate   int
+	RoomTemp     float64
+	RoomTempUnit string
+	RefDist      float64
+	RefDistUnit  string
+	DistUnit     string
+	Mics         []AlignmentDelayImportRow
+}
+
+func AlignmentDelayImportCSV(csvData string) (AlignmentDelayImportResult, error) {
+	r := csv.NewReader(strings.NewReader(csvData))
+	r.TrimLeadingSpace = true
+
+	rows, err := r.ReadAll()
+	if err != nil {
+		return AlignmentDelayImportResult{}, err
+	}
+	if len(rows) == 0 {
+		return AlignmentDelayImportResult{}, errors.New("empty csv")
+	}
+
+	start := 0
+	if len(rows[0]) > 0 {
+		if strings.EqualFold(strings.TrimSpace(rows[0][0]), "name") {
+			start = 1
+		}
+	}
+
+	var res AlignmentDelayImportResult
+	for i := start; i < len(rows); i++ {
+		rec := rows[i]
+		if len(rec) == 0 {
+			continue
+		}
+		if len(rec) < 10 {
+			return AlignmentDelayImportResult{}, errors.New("invalid csv row: expected 10 columns")
+		}
+
+		name := strings.TrimSpace(rec[0])
+		if name == "" {
+			continue
+		}
+
+		dist := ParseFloat(rec[1])
+		distUnit := strings.TrimSpace(rec[2])
+		if distUnit == "" {
+			distUnit = "m"
+		}
+
+		sampleRate := ParseSampleRate(rec[5])
+		roomTemp := ParseFloat(rec[6])
+		roomTempUnit := strings.TrimSpace(rec[7])
+		if roomTempUnit == "" {
+			roomTempUnit = "C"
+		}
+		refDist := ParseFloat(rec[8])
+		refDistUnit := strings.TrimSpace(rec[9])
+		if refDistUnit == "" {
+			refDistUnit = "m"
+		}
+
+		if len(res.Mics) == 0 {
+			res.SampleRate = sampleRate
+			res.RoomTemp = roomTemp
+			res.RoomTempUnit = roomTempUnit
+			res.RefDist = refDist
+			res.RefDistUnit = refDistUnit
+			res.DistUnit = distUnit
+		}
+
+		res.Mics = append(res.Mics, AlignmentDelayImportRow{Name: name, Dist: dist, DistUnit: distUnit})
+	}
+
+	if len(res.Mics) == 0 {
+		return AlignmentDelayImportResult{}, errors.New("no mic rows found")
+	}
+	if res.SampleRate <= 0 {
+		res.SampleRate = 48000
+	}
+
+	return res, nil
 }
