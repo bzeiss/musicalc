@@ -3,6 +3,7 @@ package widgets
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/mobile"
@@ -15,6 +16,8 @@ type TimecodeEntry struct {
 	OnComplete       func()                 // Called when all digits are entered
 	OnOperationKey   func(key fyne.KeyName) // Called when +/- keys are pressed
 	fields           []string               // Field values [frames, seconds, minutes, hours] - right to left
+	lastOpKey        fyne.KeyName
+	lastOpAt         time.Time
 }
 
 func NewTimecodeEntry(threeDigits bool) *TimecodeEntry {
@@ -41,15 +44,32 @@ func (e *TimecodeEntry) Keyboard() mobile.KeyboardType {
 	return mobile.NumberKeyboard
 }
 
+func (e *TimecodeEntry) shouldHandleOperationKey(key fyne.KeyName) bool {
+	// Some platforms deliver both TypedRune ('-' / '+') and TypedKey (KeyMinus/KeyEqual)
+	// for a single keypress. De-dupe within a short window.
+	if e.lastOpKey == key {
+		if !e.lastOpAt.IsZero() && time.Since(e.lastOpAt) < 50*time.Millisecond {
+			return false
+		}
+	}
+	e.lastOpKey = key
+	e.lastOpAt = time.Now()
+	return true
+}
+
 // TypedRune handles right-justified timecode entry with dot as field separator
 func (e *TimecodeEntry) TypedRune(r rune) {
 	// Handle +/- as operation keys
 	if r == '+' || r == '-' {
 		if e.OnOperationKey != nil {
 			if r == '+' {
-				e.OnOperationKey(fyne.KeyEqual)
+				if e.shouldHandleOperationKey(fyne.KeyEqual) {
+					e.OnOperationKey(fyne.KeyEqual)
+				}
 			} else {
-				e.OnOperationKey(fyne.KeyMinus)
+				if e.shouldHandleOperationKey(fyne.KeyMinus) {
+					e.OnOperationKey(fyne.KeyMinus)
+				}
 			}
 		}
 		return
@@ -96,7 +116,9 @@ func (e *TimecodeEntry) TypedKey(k *fyne.KeyEvent) {
 	case fyne.KeyEqual, fyne.KeyMinus:
 		// Handle +/- operation keys
 		if e.OnOperationKey != nil {
-			e.OnOperationKey(k.Name)
+			if e.shouldHandleOperationKey(k.Name) {
+				e.OnOperationKey(k.Name)
+			}
 		}
 		return
 	case fyne.KeyPeriod, fyne.KeyComma:
