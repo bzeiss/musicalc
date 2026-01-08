@@ -135,52 +135,92 @@ func main() {
 	perTabToolbarItems := make([][]widget.ToolbarItem, len(allTabs))
 	perTabToolbarItems[6] = []widget.ToolbarItem{
 		widget.NewToolbarAction(theme.FolderOpenIcon(), func() {
+			isMobile := fyne.CurrentDevice().IsMobile()
+			dialogWindow := window
+			if !isMobile {
+				dialogWindow = fyne.CurrentApp().NewWindow("Import Alignment CSV")
+				dialogWindow.Resize(fyne.NewSize(900, 700))
+				dialogWindow.SetContent(container.NewMax())
+				dialogWindow.Show()
+			}
 			d := dialog.NewFileOpen(func(rc fyne.URIReadCloser, err error) {
 				if err != nil {
-					dialog.ShowError(err, window)
+					dialog.ShowError(err, dialogWindow)
 					return
 				}
 				if rc == nil {
+					if !isMobile {
+						dialogWindow.Close()
+					}
 					return
 				}
 				defer rc.Close()
 
 				b, err := io.ReadAll(rc)
 				if err != nil {
-					dialog.ShowError(err, window)
+					dialog.ShowError(err, dialogWindow)
 					return
 				}
 				if err := alignmentImportCSV(string(b)); err != nil {
-					dialog.ShowError(err, window)
+					dialog.ShowError(err, dialogWindow)
 					return
 				}
-			}, window)
+				if !isMobile {
+					dialogWindow.Close()
+				}
+			}, dialogWindow)
 			d.SetFilter(storage.NewExtensionFileFilter([]string{".csv"}))
+			if !isMobile {
+				sz := dialogWindow.Canvas().Size()
+				if sz.Width > 0 && sz.Height > 0 {
+					d.Resize(fyne.NewSize(sz.Width*0.98, sz.Height*0.98))
+				}
+			}
 			d.Show()
 		}),
 		widget.NewToolbarAction(theme.DownloadIcon(), func() {
+			isMobile := fyne.CurrentDevice().IsMobile()
+			dialogWindow := window
+			if !isMobile {
+				dialogWindow = fyne.CurrentApp().NewWindow("Export Alignment CSV")
+				dialogWindow.Resize(fyne.NewSize(900, 700))
+				dialogWindow.SetContent(container.NewMax())
+				dialogWindow.Show()
+			}
 			d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
 				if err != nil {
-					dialog.ShowError(err, window)
+					dialog.ShowError(err, dialogWindow)
 					return
 				}
 				if uc == nil {
+					if !isMobile {
+						dialogWindow.Close()
+					}
 					return
 				}
 				defer uc.Close()
 
 				data, err := alignmentExportCSV()
 				if err != nil {
-					dialog.ShowError(err, window)
+					dialog.ShowError(err, dialogWindow)
 					return
 				}
 				if _, err := uc.Write([]byte(data)); err != nil {
-					dialog.ShowError(err, window)
+					dialog.ShowError(err, dialogWindow)
 					return
 				}
-			}, window)
+				if !isMobile {
+					dialogWindow.Close()
+				}
+			}, dialogWindow)
 			d.SetFileName("alignment_delay.csv")
 			d.SetFilter(storage.NewExtensionFileFilter([]string{".csv"}))
+			if !isMobile {
+				sz := dialogWindow.Canvas().Size()
+				if sz.Width > 0 && sz.Height > 0 {
+					d.Resize(fyne.NewSize(sz.Width*0.98, sz.Height*0.98))
+				}
+			}
 			d.Show()
 		}),
 	}
