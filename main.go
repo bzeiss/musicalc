@@ -54,7 +54,7 @@ func main() {
 		"note2freq":    "Note to Frequency",
 		"freq2note":    "Frequency to Note",
 		"samplelength": "Sample Length",
-		"alignment":    "Multi-Mic Alignment Delay",
+		"alignment":    "Alignment Delay",
 	}
 
 	var switchCategory func(int)
@@ -109,7 +109,7 @@ func main() {
 		{Name: "Time & Tempo", TabIndices: []int{0, 1, 2}},
 		{Name: "Frequency & Pitch", TabIndices: []int{3, 4}},
 		{Name: "Analysis", TabIndices: []int{5}},
-		{Name: "Multi Mic", TabIndices: []int{6}},
+		{Name: "Multi-Mic", TabIndices: []int{6}},
 	}
 
 	// Tab heading keys for each global tab index
