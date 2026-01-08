@@ -120,6 +120,11 @@ func (b *compactIconButton) CreateRenderer() fyne.WidgetRenderer {
 
 // NewAlignmentDelayTab creates the Multi-Mic Alignment Delay calculator
 func NewAlignmentDelayTab() fyne.CanvasObject {
+	content, _ := NewAlignmentDelayTabWithExport()
+	return content
+}
+
+func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)) {
 	// Temperature input
 	tempEntry := widget.NewEntry()
 	//tempEntry.SetText("22")
@@ -259,6 +264,20 @@ func NewAlignmentDelayTab() fyne.CanvasObject {
 		cardList.Refresh()
 	}
 
+	exportCSV := func() (string, error) {
+		if refreshTable != nil {
+			refreshTable()
+		}
+
+		unit := targetUnitSelect.Selected
+		roomTemp := logic.ParseFloat(tempEntry.Text)
+		roomTempUnit := tempUnitSelect.Selected
+		refDist := logic.ParseFloat(refDistEntry.Text)
+		refDistUnit := refUnitSelect.Selected
+
+		return logic.AlignmentDelayExportCSV(calc, unit, roomTemp, roomTempUnit, refDist, refDistUnit)
+	}
+
 	// Add microphone button with emphasis
 	addButton := widget.NewButton("+", func() {
 		// Button handler
@@ -345,9 +364,10 @@ func NewAlignmentDelayTab() fyne.CanvasObject {
 		micRow,
 	)
 
-	return container.NewBorder(
+	content := container.NewBorder(
 		topControls,
 		nil, nil, nil,
 		cardList,
 	)
+	return content, exportCSV
 }

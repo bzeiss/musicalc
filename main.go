@@ -8,6 +8,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -22,12 +24,12 @@ type CategoryInfo struct {
 }
 
 // createCompactHeader creates a compact header with: hamburger + "category / tab heading"
-func createCompactHeader(window fyne.Window, categories []CategoryInfo, switchCategory func(int), headerLabel *widget.Label) *fyne.Container {
+func createCompactHeader(window fyne.Window, categories []CategoryInfo, switchCategory func(int), headerLabel *widget.Label, toolbar *widget.Toolbar) *fyne.Container {
 	menuButton := widget.NewButtonWithIcon("", theme.MenuIcon(), func() {
 		showCategoryMenu(window, categories, switchCategory)
 	})
 	menuButton.Importance = widget.LowImportance
-	return container.NewHBox(menuButton, container.NewCenter(headerLabel))
+	return container.NewBorder(nil, nil, menuButton, toolbar, container.NewCenter(headerLabel))
 }
 
 func main() {
@@ -91,7 +93,8 @@ func main() {
 	sampleLengthTab := container.NewTabItem(sampleLengthText, ui.NewSampleLengthTab())
 	sampleLengthTab.Icon = ui.ResourceSamplelengthSvg
 
-	alignmentTab := container.NewTabItem(alignmentText, ui.NewAlignmentDelayTab())
+	alignmentContent, alignmentExportCSV := ui.NewAlignmentDelayTabWithExport()
+	alignmentTab := container.NewTabItem(alignmentText, alignmentContent)
 	alignmentTab.Icon = ui.ResourceAlignmentdelaySvg
 
 	// Create single AppTabs with ALL tabs (maintains left alignment)
@@ -124,6 +127,49 @@ func main() {
 	currentCategoryIndex := 0
 
 	headerLabel := widget.NewLabel("")
+	headerToolbar := widget.NewToolbar()
+	headerToolbar.Hide()
+
+	// Per-tab toolbar items (empty for all calculators for now)
+	perTabToolbarItems := make([][]widget.ToolbarItem, len(allTabs))
+	perTabToolbarItems[6] = []widget.ToolbarItem{
+		widget.NewToolbarAction(theme.DownloadIcon(), func() {
+			d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
+				if err != nil {
+					dialog.ShowError(err, window)
+					return
+				}
+				if uc == nil {
+					return
+				}
+				defer uc.Close()
+
+				data, err := alignmentExportCSV()
+				if err != nil {
+					dialog.ShowError(err, window)
+					return
+				}
+				if _, err := uc.Write([]byte(data)); err != nil {
+					dialog.ShowError(err, window)
+					return
+				}
+			}, window)
+			d.SetFileName("alignment_delay.csv")
+			d.SetFilter(storage.NewExtensionFileFilter([]string{".csv"}))
+			d.Show()
+		}),
+	}
+	setHeaderToolbar := func(items []widget.ToolbarItem) {
+		if len(items) == 0 {
+			headerToolbar.Hide()
+			headerToolbar.Items = nil
+			headerToolbar.Refresh()
+			return
+		}
+		headerToolbar.Items = items
+		headerToolbar.Show()
+		headerToolbar.Refresh()
+	}
 
 	// Helper to show only tabs for a specific category
 	showCategoryTabs := func(categoryIdx int) {
@@ -168,6 +214,7 @@ func main() {
 						if tabIdx == i {
 							headerText := cat.Name + " / " + tabHeadings[tabHeadingKeys[i]]
 							headerLabel.SetText(headerText)
+							setHeaderToolbar(perTabToolbarItems[i])
 							return
 						}
 					}
@@ -201,7 +248,7 @@ func main() {
 	}
 
 	// Create initial header and content
-	header := createCompactHeader(window, categories, switchCategory, headerLabel)
+	header := createCompactHeader(window, categories, switchCategory, headerLabel, headerToolbar)
 
 	content := container.NewBorder(
 		container.NewVBox(header, widget.NewSeparator()),

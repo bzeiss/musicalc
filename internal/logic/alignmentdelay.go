@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"encoding/csv"
 	"math"
 	"strconv"
 	"strings"
@@ -128,4 +129,68 @@ func ParseSampleRate(rateStr string) int {
 	}
 
 	return 48000
+}
+
+func trimFloat(v float64, decimals int) string {
+	s := strconv.FormatFloat(v, 'f', decimals, 64)
+	s = strings.TrimRight(s, "0")
+	s = strings.TrimRight(s, ".")
+	if s == "" || s == "-0" {
+		return "0"
+	}
+	return s
+}
+
+func AlignmentDelayExportCSV(calc *AlignmentDelayCalculator, distUnit string, roomTemp float64, roomTempUnit string, refDist float64, refDistUnit string) (string, error) {
+	var sb strings.Builder
+	w := csv.NewWriter(&sb)
+
+	if err := w.Write([]string{
+		"name",
+		"ref to dist",
+		"ref to dist measure",
+		"delay ms",
+		"delay samps",
+		"samplerate",
+		"room temp",
+		"room temp measure",
+		"ref dist",
+		"ref dist measure",
+	}); err != nil {
+		return "", err
+	}
+
+	sampleRate := strconv.Itoa(calc.SampleRate)
+	roomTempStr := trimFloat(roomTemp, 2)
+	refDistStr := trimFloat(refDist, 3)
+
+	for _, mic := range calc.Mics {
+		dist := trimFloat(FromMeters(mic.DistanceMeters, distUnit), 3)
+		delayMS := ""
+		delaySamps := ""
+		if !mic.IsBeyondReference {
+			delayMS = trimFloat(mic.DelayMS, 2)
+			delaySamps = strconv.Itoa(mic.DelaySamples)
+		}
+		if err := w.Write([]string{
+			mic.Name,
+			dist,
+			distUnit,
+			delayMS,
+			delaySamps,
+			sampleRate,
+			roomTempStr,
+			roomTempUnit,
+			refDistStr,
+			refDistUnit,
+		}); err != nil {
+			return "", err
+		}
+	}
+
+	w.Flush()
+	if err := w.Error(); err != nil {
+		return "", err
+	}
+	return sb.String(), nil
 }
