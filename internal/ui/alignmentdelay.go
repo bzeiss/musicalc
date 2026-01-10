@@ -218,74 +218,38 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 	var refreshTable func()
 
 	// Mobile-friendly card list (2 lines per mic)
-	isMobile := fyne.CurrentDevice().IsMobile()
-	cardItemHeight := float32(0)
-
-	createCardItem := func() fyne.CanvasObject {
-		nameLabel := widget.NewLabelWithStyle("", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-		nameLabel.Truncation = fyne.TextTruncateClip
-		removeIcon := newCompactIconButton(theme.DeleteIcon(), nil)
-		removeIconSlot := container.NewGridWrap(fyne.NewSize(22, 16), container.NewCenter(removeIcon))
-		line1 := container.New(&cardLine1Layout{}, nameLabel, removeIconSlot)
-
-		distLabel := widget.NewLabel("0")
-		distLabel.Truncation = fyne.TextTruncateClip
-		delayLabel := widget.NewLabel("0")
-		delayLabel.Alignment = fyne.TextAlignTrailing
-		delayLabel.Truncation = fyne.TextTruncateClip
-		line2 := container.NewHBox(distLabel, layout.NewSpacer(), delayLabel)
-
-		content := container.New(&tightVBoxLayout{}, line1, line2)
-		padded := container.New(layout.NewCustomPaddedLayout(2, 2, 1, 1), content)
-
-		bg := canvas.NewRectangle(theme.Color(theme.ColorNameInputBackground))
-		bg.StrokeColor = theme.Color(theme.ColorNameSeparator)
-		bg.StrokeWidth = 1
-		bg.CornerRadius = 6
-
-		return container.NewStack(bg, padded)
-	}
-
-	if isMobile {
-		tmpl := createCardItem()
-		cardItemHeight = tmpl.MinSize().Height
-		if cardItemHeight > 0 {
-			cardItemHeight = cardItemHeight + theme.Padding()*2
-		}
-	}
-
 	cardList := widget.NewList(
 		func() int {
 			return len(calc.Mics)
 		},
 		func() fyne.CanvasObject {
-			card := createCardItem()
-			if isMobile && cardItemHeight > 0 {
-				return container.New(&fixedHeightLayout{h: cardItemHeight}, card)
-			}
-			return card
+			nameLabel := widget.NewLabelWithStyle("", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+			nameLabel.Truncation = fyne.TextTruncateClip
+			removeBtn := widget.NewButtonWithIcon("", theme.DeleteIcon(), nil)
+			removeBtn.Importance = widget.LowImportance
+			line1 := container.NewHBox(nameLabel, layout.NewSpacer(), removeBtn)
+
+			distLabel := widget.NewLabel("")
+			distLabel.Truncation = fyne.TextTruncateClip
+			delayLabel := widget.NewLabel("")
+			delayLabel.Alignment = fyne.TextAlignTrailing
+			delayLabel.Truncation = fyne.TextTruncateClip
+			line2 := container.NewHBox(distLabel, layout.NewSpacer(), delayLabel)
+
+			card := container.NewVBox(line1, line2)
+			return container.NewPadded(card)
 		},
 		func(id widget.ListItemID, o fyne.CanvasObject) {
 			if id < 0 || id >= len(calc.Mics) {
 				return
 			}
 			mic := calc.Mics[id]
-			root := o
-			if isMobile {
-				wrap := o.(*fyne.Container)
-				if len(wrap.Objects) > 0 {
-					root = wrap.Objects[0]
-				}
-			}
-			outer := root.(*fyne.Container)
-			padded := outer.Objects[1].(*fyne.Container)
-			content := padded.Objects[0].(*fyne.Container)
+			outer := o.(*fyne.Container)
+			content := outer.Objects[0].(*fyne.Container)
 
 			line1 := content.Objects[0].(*fyne.Container)
 			nameLabel := line1.Objects[0].(*widget.Label)
-			removeIconSlot := line1.Objects[1].(*fyne.Container)
-			removeIconCenter := removeIconSlot.Objects[0].(*fyne.Container)
-			removeIcon := removeIconCenter.Objects[0].(*compactIconButton)
+			removeBtn := line1.Objects[2].(*widget.Button)
 
 			line2 := content.Objects[1].(*fyne.Container)
 			distLabel := line2.Objects[0].(*widget.Label)
@@ -301,7 +265,7 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 			}
 
 			rowID := id
-			removeIcon.onTapped = func() {
+			removeBtn.OnTapped = func() {
 				if rowID >= 0 && rowID < len(calc.Mics) {
 					calc.RemoveMicAt(rowID)
 					if refreshTable != nil {
