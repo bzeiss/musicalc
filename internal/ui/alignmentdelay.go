@@ -218,63 +218,8 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 	var refreshTable func()
 
 	// Mobile-friendly card list (2 lines per mic)
-	cardList := widget.NewList(
-		func() int {
-			return len(calc.Mics)
-		},
-		func() fyne.CanvasObject {
-			nameLabel := widget.NewLabelWithStyle("", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-			nameLabel.Truncation = fyne.TextTruncateClip
-			removeBtn := widget.NewButtonWithIcon("", theme.DeleteIcon(), nil)
-			removeBtn.Importance = widget.LowImportance
-			line1 := container.NewHBox(nameLabel, layout.NewSpacer(), removeBtn)
-
-			distLabel := widget.NewLabel("")
-			distLabel.Truncation = fyne.TextTruncateClip
-			delayLabel := widget.NewLabel("")
-			delayLabel.Alignment = fyne.TextAlignTrailing
-			delayLabel.Truncation = fyne.TextTruncateClip
-			line2 := container.NewHBox(distLabel, layout.NewSpacer(), delayLabel)
-
-			card := container.NewVBox(line1, line2)
-			return container.NewPadded(card)
-		},
-		func(id widget.ListItemID, o fyne.CanvasObject) {
-			if id < 0 || id >= len(calc.Mics) {
-				return
-			}
-			mic := calc.Mics[id]
-			outer := o.(*fyne.Container)
-			content := outer.Objects[0].(*fyne.Container)
-
-			line1 := content.Objects[0].(*fyne.Container)
-			nameLabel := line1.Objects[0].(*widget.Label)
-			removeBtn := line1.Objects[2].(*widget.Button)
-
-			line2 := content.Objects[1].(*fyne.Container)
-			distLabel := line2.Objects[0].(*widget.Label)
-			delayLabel := line2.Objects[2].(*widget.Label)
-
-			nameLabel.SetText(mic.Name)
-			unit := targetUnitSelect.Selected
-			distLabel.SetText(formatTrimFloat(logic.FromMeters(mic.DistanceMeters, unit), 3) + unit)
-			if mic.IsBeyondReference {
-				delayLabel.SetText("N/A")
-			} else {
-				delayLabel.SetText(formatTrimFloat(mic.DelayMS, 2) + fmt.Sprintf("ms / %d smp", mic.DelaySamples))
-			}
-
-			rowID := id
-			removeBtn.OnTapped = func() {
-				if rowID >= 0 && rowID < len(calc.Mics) {
-					calc.RemoveMicAt(rowID)
-					if refreshTable != nil {
-						refreshTable()
-					}
-				}
-			}
-		},
-	)
+	cardsBox := container.NewVBox()
+	cardList := container.NewVScroll(cardsBox)
 
 	emptyMicsLabel := widget.NewLabelWithStyle("No microphones added yet", fyne.TextAlignCenter, fyne.TextStyle{Italic: true})
 
@@ -284,6 +229,48 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 		calc.SetSampleRateLabel(sampleRateSelect.Selected)
 		calc.SetReferenceDistance(logic.ParseFloat(refDistEntry.Text), refUnitSelect.Selected)
 		calc.Recalculate()
+		cardsBox.Objects = nil
+		unit := targetUnitSelect.Selected
+		for i := 0; i < len(calc.Mics); i++ {
+			mic := calc.Mics[i]
+			nameLabel := widget.NewLabelWithStyle(mic.Name, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+			nameLabel.Truncation = fyne.TextTruncateClip
+			removeIcon := newCompactIconButton(theme.DeleteIcon(), nil)
+			removeIconSlot := container.NewGridWrap(fyne.NewSize(22, 16), container.NewCenter(removeIcon))
+			line1 := container.New(&cardLine1Layout{}, nameLabel, removeIconSlot)
+
+			distLabel := widget.NewLabel(formatTrimFloat(logic.FromMeters(mic.DistanceMeters, unit), 3) + unit)
+			distLabel.Truncation = fyne.TextTruncateClip
+			delayLabel := widget.NewLabel("")
+			delayLabel.Alignment = fyne.TextAlignTrailing
+			delayLabel.Truncation = fyne.TextTruncateClip
+			if mic.IsBeyondReference {
+				delayLabel.SetText("N/A")
+			} else {
+				delayLabel.SetText(formatTrimFloat(mic.DelayMS, 2) + fmt.Sprintf("ms / %d smp", mic.DelaySamples))
+			}
+			line2 := container.NewHBox(distLabel, layout.NewSpacer(), delayLabel)
+
+			content := container.New(&tightVBoxLayout{}, line1, line2)
+			padded := container.New(layout.NewCustomPaddedLayout(2, 2, 1, 1), content)
+
+			bg := canvas.NewRectangle(theme.Color(theme.ColorNameInputBackground))
+			bg.StrokeColor = theme.Color(theme.ColorNameSeparator)
+			bg.StrokeWidth = 1
+			bg.CornerRadius = 6
+
+			rowID := i
+			removeIcon.onTapped = func() {
+				if rowID >= 0 && rowID < len(calc.Mics) {
+					calc.RemoveMicAt(rowID)
+					if refreshTable != nil {
+						refreshTable()
+					}
+				}
+			}
+
+			cardsBox.Add(container.NewStack(bg, padded))
+		}
 		if len(calc.Mics) == 0 {
 			emptyMicsLabel.Show()
 			cardList.Hide()
@@ -291,6 +278,7 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 			emptyMicsLabel.Hide()
 			cardList.Show()
 		}
+		cardsBox.Refresh()
 		cardList.Refresh()
 	}
 
