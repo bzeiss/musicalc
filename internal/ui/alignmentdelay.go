@@ -159,7 +159,7 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 	// Temperature input
 	tempEntry := uiwidgets.NewNumericEntry()
 	//tempEntry.SetText("22")
-	tempEntry.SetPlaceHolder("Room Temp.")
+	tempEntry.SetPlaceHolder("Room Temperature")
 
 	tempUnitSelect := widget.NewSelect([]string{"C", "F"}, nil)
 	tempUnitSelect.SetSelected("C")
@@ -167,7 +167,7 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 	// Reference distance input
 	refDistEntry := uiwidgets.NewNumericEntry()
 	//refDistEntry.SetText("1")
-	refDistEntry.SetPlaceHolder("Ref Distance")
+	refDistEntry.SetPlaceHolder("Reference Distance")
 
 	refUnitSelect := widget.NewSelect([]string{"m", "ft"}, nil)
 	refUnitSelect.SetSelected("m")
@@ -227,7 +227,7 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 		if 16 > line1H {
 			line1H = 16
 		}
-		cardItemHeight = line1H + line2H + theme.Padding()*2 + 8
+		cardItemHeight = line1H + line2H + theme.Padding()*4 + 10
 	}
 
 	cardList := widget.NewList(
@@ -241,9 +241,9 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 			removeIconSlot := container.NewGridWrap(fyne.NewSize(22, 16), container.NewCenter(removeIcon))
 			line1 := container.New(&cardLine1Layout{}, nameLabel, removeIconSlot)
 
-			distLabel := widget.NewLabel(" ")
+			distLabel := widget.NewLabel("\u00A0")
 			distLabel.Truncation = fyne.TextTruncateClip
-			delayLabel := widget.NewLabel(" ")
+			delayLabel := widget.NewLabel("\u00A0")
 			delayLabel.Alignment = fyne.TextAlignTrailing
 			delayLabel.Truncation = fyne.TextTruncateClip
 			line2 := container.NewHBox(distLabel, layout.NewSpacer(), delayLabel)
@@ -256,14 +256,25 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 			bg.StrokeWidth = 1
 			bg.CornerRadius = 6
 
-			return container.NewStack(bg, padded)
+			card := container.NewStack(bg, padded)
+			if isMobile && cardItemHeight > 0 {
+				return container.New(&fixedHeightLayout{h: cardItemHeight}, card)
+			}
+			return card
 		},
 		func(id widget.ListItemID, o fyne.CanvasObject) {
 			if id < 0 || id >= len(calc.Mics) {
 				return
 			}
 			mic := calc.Mics[id]
-			outer := o.(*fyne.Container)
+			root := o
+			if isMobile {
+				wrap := o.(*fyne.Container)
+				if len(wrap.Objects) > 0 {
+					root = wrap.Objects[0]
+				}
+			}
+			outer := root.(*fyne.Container)
 			padded := outer.Objects[1].(*fyne.Container)
 			content := padded.Objects[0].(*fyne.Container)
 
@@ -312,11 +323,6 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 		} else {
 			emptyMicsLabel.Hide()
 			cardList.Show()
-		}
-		if isMobile && cardItemHeight > 0 {
-			for i := 0; i < len(calc.Mics); i++ {
-				cardList.SetItemHeight(i, cardItemHeight)
-			}
 		}
 		cardList.Refresh()
 	}
