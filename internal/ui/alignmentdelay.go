@@ -255,12 +255,21 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 		},
 	)
 
+	emptyMicsLabel := widget.NewLabelWithStyle("No microphones added yet", fyne.TextAlignCenter, fyne.TextStyle{Italic: true})
+
 	// Refresh data
 	refreshTable = func() {
 		calc.SetTemperature(logic.ParseFloat(tempEntry.Text), tempUnitSelect.Selected)
 		calc.SetSampleRateLabel(sampleRateSelect.Selected)
 		calc.SetReferenceDistance(logic.ParseFloat(refDistEntry.Text), refUnitSelect.Selected)
 		calc.Recalculate()
+		if len(calc.Mics) == 0 {
+			emptyMicsLabel.Show()
+			cardList.Hide()
+		} else {
+			emptyMicsLabel.Hide()
+			cardList.Show()
+		}
 		cardList.Refresh()
 	}
 
@@ -378,25 +387,20 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 
 	tempGroup := container.NewBorder(
 		nil, nil, nil,
-		fixedWrap(tempUnitSelect, 60),
+		fixedWrap(tempUnitSelect, 90),
 		tempEntry,
 	)
 
 	refGroup := container.NewBorder(
 		nil, nil, nil,
-		fixedWrap(refUnitSelect, 70),
+		fixedWrap(refUnitSelect, 90),
 		refDistEntry,
 	)
 
-	tempRefRow := container.NewGridWithColumns(2,
+	topRow := container.NewVBox(
+		sampleRateSelect,
 		tempGroup,
 		refGroup,
-	)
-
-	topRow := container.NewBorder(
-		nil, nil,
-		fixedWrap(sampleRateSelect, 100), nil,
-		tempRefRow,
 	)
 
 	// Emphasize the add button and make it wider
@@ -407,27 +411,39 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 		addButton,
 	)
 
-	micRow := container.NewBorder(
-		nil, nil, nil,
+	unitWidth := float32(70)
+	if fyne.CurrentDevice().IsMobile() {
+		unitWidth = 90
+	}
+
+	micNameRow := container.NewBorder(nil, nil, nil, nil, micNameSelect)
+
+	micDistRight := container.NewHBox(
+		fixedWrap(targetUnitSelect, unitWidth),
 		fixedAddButton,
-		container.NewBorder(nil, nil, nil, fixedWrap(targetUnitSelect, 70),
-			container.NewGridWithColumns(2,
-				micNameSelect,
-				targetDistEntry,
-			),
-		),
+	)
+
+	micDistRow := container.NewBorder(
+		nil, nil, nil,
+		micDistRight,
+		targetDistEntry,
 	)
 
 	topControls := container.NewVBox(
 		topRow,
 		widget.NewSeparator(),
-		micRow,
+		micNameRow,
+		micDistRow,
 	)
+
+	micsHeading := widget.NewLabelWithStyle("Microphones", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	micsHeader := container.NewVBox(micsHeading, container.NewCenter(emptyMicsLabel))
+	micsSection := container.NewBorder(micsHeader, nil, nil, nil, cardList)
 
 	content := container.NewBorder(
 		topControls,
 		nil, nil, nil,
-		cardList,
+		micsSection,
 	)
 	return content, exportCSV, importCSV
 }
