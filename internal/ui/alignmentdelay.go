@@ -220,14 +220,38 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 	// Mobile-friendly card list (2 lines per mic)
 	isMobile := fyne.CurrentDevice().IsMobile()
 	cardItemHeight := float32(0)
+
+	createCardItem := func() fyne.CanvasObject {
+		nameLabel := widget.NewLabelWithStyle("", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+		nameLabel.Truncation = fyne.TextTruncateClip
+		removeIcon := newCompactIconButton(theme.DeleteIcon(), nil)
+		removeIconSlot := container.NewGridWrap(fyne.NewSize(22, 16), container.NewCenter(removeIcon))
+		line1 := container.New(&cardLine1Layout{}, nameLabel, removeIconSlot)
+
+		distLabel := widget.NewLabel("\u00A0")
+		distLabel.Truncation = fyne.TextTruncateClip
+		delayLabel := widget.NewLabel("\u00A0")
+		delayLabel.Alignment = fyne.TextAlignTrailing
+		delayLabel.Truncation = fyne.TextTruncateClip
+		line2 := container.NewHBox(distLabel, layout.NewSpacer(), delayLabel)
+
+		content := container.New(&tightVBoxLayout{}, line1, line2)
+		padded := container.New(layout.NewCustomPaddedLayout(2, 2, 1, 1), content)
+
+		bg := canvas.NewRectangle(theme.Color(theme.ColorNameInputBackground))
+		bg.StrokeColor = theme.Color(theme.ColorNameSeparator)
+		bg.StrokeWidth = 1
+		bg.CornerRadius = 6
+
+		return container.NewStack(bg, padded)
+	}
+
 	if isMobile {
-		textSize := theme.TextSize()
-		line1H := fyne.MeasureText("Ag", textSize, fyne.TextStyle{Bold: true}).Height
-		line2H := fyne.MeasureText("Ag", textSize, fyne.TextStyle{}).Height
-		if 16 > line1H {
-			line1H = 16
+		tmpl := createCardItem()
+		cardItemHeight = tmpl.MinSize().Height
+		if cardItemHeight > 0 {
+			cardItemHeight = cardItemHeight + theme.Padding()*2
 		}
-		cardItemHeight = line1H + line2H + theme.Padding()*4 + 10
 	}
 
 	cardList := widget.NewList(
@@ -235,28 +259,7 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 			return len(calc.Mics)
 		},
 		func() fyne.CanvasObject {
-			nameLabel := widget.NewLabelWithStyle("", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-			nameLabel.Truncation = fyne.TextTruncateClip
-			removeIcon := newCompactIconButton(theme.DeleteIcon(), nil)
-			removeIconSlot := container.NewGridWrap(fyne.NewSize(22, 16), container.NewCenter(removeIcon))
-			line1 := container.New(&cardLine1Layout{}, nameLabel, removeIconSlot)
-
-			distLabel := widget.NewLabel("\u00A0")
-			distLabel.Truncation = fyne.TextTruncateClip
-			delayLabel := widget.NewLabel("\u00A0")
-			delayLabel.Alignment = fyne.TextAlignTrailing
-			delayLabel.Truncation = fyne.TextTruncateClip
-			line2 := container.NewHBox(distLabel, layout.NewSpacer(), delayLabel)
-
-			content := container.New(&tightVBoxLayout{}, line1, line2)
-			padded := container.New(layout.NewCustomPaddedLayout(2, 2, 1, 1), content)
-
-			bg := canvas.NewRectangle(theme.Color(theme.ColorNameInputBackground))
-			bg.StrokeColor = theme.Color(theme.ColorNameSeparator)
-			bg.StrokeWidth = 1
-			bg.CornerRadius = 6
-
-			card := container.NewStack(bg, padded)
+			card := createCardItem()
 			if isMobile && cardItemHeight > 0 {
 				return container.New(&fixedHeightLayout{h: cardItemHeight}, card)
 			}
