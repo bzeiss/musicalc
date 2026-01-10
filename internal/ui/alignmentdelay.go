@@ -219,7 +219,12 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 
 	// Mobile-friendly card list (2 lines per mic)
 	cardsBox := container.NewVBox()
-	cardList := container.NewVScroll(cardsBox)
+	cardsScroll := container.NewVScroll(cardsBox)
+	isMobile := fyne.CurrentDevice().IsMobile()
+	cardsArea := fyne.CanvasObject(cardsScroll)
+	if isMobile {
+		cardsArea = cardsBox
+	}
 
 	emptyMicsLabel := widget.NewLabelWithStyle("No microphones added yet", fyne.TextAlignCenter, fyne.TextStyle{Italic: true})
 
@@ -229,15 +234,23 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 		calc.SetSampleRateLabel(sampleRateSelect.Selected)
 		calc.SetReferenceDistance(logic.ParseFloat(refDistEntry.Text), refUnitSelect.Selected)
 		calc.Recalculate()
-		cardsBox.Objects = nil
+		cardsBox.RemoveAll()
 		unit := targetUnitSelect.Selected
 		for i := 0; i < len(calc.Mics); i++ {
 			mic := calc.Mics[i]
 			nameLabel := widget.NewLabelWithStyle(mic.Name, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 			nameLabel.Truncation = fyne.TextTruncateClip
-			removeIcon := newCompactIconButton(theme.DeleteIcon(), nil)
-			removeIconSlot := container.NewGridWrap(fyne.NewSize(22, 16), container.NewCenter(removeIcon))
-			line1 := container.New(&cardLine1Layout{}, nameLabel, removeIconSlot)
+			rowID := i
+			removeBtn := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
+				if rowID >= 0 && rowID < len(calc.Mics) {
+					calc.RemoveMicAt(rowID)
+					if refreshTable != nil {
+						refreshTable()
+					}
+				}
+			})
+			removeBtn.Importance = widget.LowImportance
+			line1 := container.NewBorder(nil, nil, nil, removeBtn, nameLabel)
 
 			distLabel := widget.NewLabel(formatTrimFloat(logic.FromMeters(mic.DistanceMeters, unit), 3) + unit)
 			distLabel.Truncation = fyne.TextTruncateClip
@@ -249,37 +262,20 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 			} else {
 				delayLabel.SetText(formatTrimFloat(mic.DelayMS, 2) + fmt.Sprintf("ms / %d smp", mic.DelaySamples))
 			}
-			line2 := container.NewHBox(distLabel, layout.NewSpacer(), delayLabel)
+			line2 := container.NewBorder(nil, nil, distLabel, delayLabel, layout.NewSpacer())
 
-			content := container.New(&tightVBoxLayout{}, line1, line2)
-			padded := container.New(layout.NewCustomPaddedLayout(2, 2, 1, 1), content)
-
-			bg := canvas.NewRectangle(theme.Color(theme.ColorNameInputBackground))
-			bg.StrokeColor = theme.Color(theme.ColorNameSeparator)
-			bg.StrokeWidth = 1
-			bg.CornerRadius = 6
-
-			rowID := i
-			removeIcon.onTapped = func() {
-				if rowID >= 0 && rowID < len(calc.Mics) {
-					calc.RemoveMicAt(rowID)
-					if refreshTable != nil {
-						refreshTable()
-					}
-				}
-			}
-
-			cardsBox.Add(container.NewStack(bg, padded))
+			content := container.NewVBox(line1, line2)
+			cardsBox.Add(widget.NewCard("", "", content))
 		}
 		if len(calc.Mics) == 0 {
 			emptyMicsLabel.Show()
-			cardList.Hide()
+			cardsArea.Hide()
 		} else {
 			emptyMicsLabel.Hide()
-			cardList.Show()
+			cardsArea.Show()
 		}
 		cardsBox.Refresh()
-		cardList.Refresh()
+		cardsScroll.Refresh()
 	}
 
 	exportCSV := func() (string, error) {
@@ -435,7 +431,7 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 	)
 
 	unitWidth := float32(70)
-	if fyne.CurrentDevice().IsMobile() {
+	if isMobile {
 		unitWidth = 90
 	}
 
@@ -461,12 +457,21 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 
 	micsHeading := widget.NewLabelWithStyle("Microphones", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 	micsHeader := container.NewVBox(micsHeading, container.NewCenter(emptyMicsLabel))
-	micsSection := container.NewBorder(micsHeader, nil, nil, nil, cardList)
 
-	content := container.NewBorder(
-		topControls,
-		nil, nil, nil,
-		micsSection,
-	)
+	var content fyne.CanvasObject
+	if isMobile {
+		content = container.NewVScroll(container.NewVBox(
+			topControls,
+			micsHeader,
+			cardsArea,
+		))
+	} else {
+		micsSection := container.NewBorder(micsHeader, nil, nil, nil, cardsArea)
+		content = container.NewBorder(
+			topControls,
+			nil, nil, nil,
+			micsSection,
+		)
+	}
 	return content, exportCSV, importCSV
 }
