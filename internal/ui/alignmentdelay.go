@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"musicalc/internal/logic"
+	uiwidgets "musicalc/internal/ui/widgets"
 )
 
 type compactIconButton struct {
@@ -126,7 +127,7 @@ func NewAlignmentDelayTab() fyne.CanvasObject {
 
 func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error), func(string) error) {
 	// Temperature input
-	tempEntry := widget.NewEntry()
+	tempEntry := uiwidgets.NewNumericEntry()
 	//tempEntry.SetText("22")
 	tempEntry.SetPlaceHolder("Room Temp.")
 
@@ -134,9 +135,9 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 	tempUnitSelect.SetSelected("C")
 
 	// Reference distance input
-	refDistEntry := widget.NewEntry()
-	//refDistEntry.SetText("5")
-	refDistEntry.SetPlaceHolder("Ref. Dist.")
+	refDistEntry := uiwidgets.NewNumericEntry()
+	//refDistEntry.SetText("1")
+	refDistEntry.SetPlaceHolder("Ref Distance")
 
 	refUnitSelect := widget.NewSelect([]string{"m", "ft"}, nil)
 	refUnitSelect.SetSelected("m")
@@ -165,7 +166,7 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 	micNameSelect.SetPlaceHolder("Name")
 
 	// Target distance input
-	targetDistEntry := widget.NewEntry()
+	targetDistEntry := uiwidgets.NewNumericEntry()
 	targetDistEntry.SetPlaceHolder("Dist. to Ref.")
 
 	targetUnitSelect := widget.NewSelect([]string{"m", "ft"}, nil)
