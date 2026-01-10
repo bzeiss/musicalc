@@ -25,6 +25,8 @@ type tightVBoxLayout struct{}
 
 type cardLine1Layout struct{}
 
+type fixedHeightLayout struct{ h float32 }
+
 func (l *tightVBoxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	y := float32(0)
 	for _, o := range objects {
@@ -95,6 +97,34 @@ func (l *cardLine1Layout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 		h = rightMS.Height
 	}
 	return fyne.NewSize(leftMS.Width+rightMS.Width, h)
+}
+
+func (l *fixedHeightLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+	for _, o := range objects {
+		if o == nil {
+			continue
+		}
+		o.Move(fyne.NewPos(0, 0))
+		o.Resize(size)
+	}
+}
+
+func (l *fixedHeightLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	w := float32(0)
+	h := l.h
+	for _, o := range objects {
+		if o == nil || !o.Visible() {
+			continue
+		}
+		ms := o.MinSize()
+		if ms.Width > w {
+			w = ms.Width
+		}
+		if ms.Height > h {
+			h = ms.Height
+		}
+	}
+	return fyne.NewSize(w, h)
 }
 
 func newCompactIconButton(icon fyne.Resource, onTapped func()) *compactIconButton {
@@ -380,8 +410,20 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 	refDistEntry.Resize(fyne.NewSize(80, refDistEntry.MinSize().Height))
 	targetDistEntry.Resize(fyne.NewSize(80, targetDistEntry.MinSize().Height))
 
+	baselineH := tempEntry.MinSize().Height
+	if refDistEntry.MinSize().Height > baselineH {
+		baselineH = refDistEntry.MinSize().Height
+	}
+	if targetDistEntry.MinSize().Height > baselineH {
+		baselineH = targetDistEntry.MinSize().Height
+	}
+
 	fixedWrap := func(obj fyne.CanvasObject, w float32) fyne.CanvasObject {
-		return container.NewGridWrap(fyne.NewSize(w, obj.MinSize().Height), obj)
+		h := obj.MinSize().Height
+		if baselineH > h {
+			h = baselineH
+		}
+		return container.NewGridWrap(fyne.NewSize(w, h), obj)
 	}
 
 	// Top section: Temperature, Reference, and Sample Rate on same row
@@ -398,8 +440,10 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 		refDistEntry,
 	)
 
+	sampleRateRow := container.New(&fixedHeightLayout{h: baselineH}, sampleRateSelect)
+
 	topRow := container.NewVBox(
-		sampleRateSelect,
+		sampleRateRow,
 		tempGroup,
 		refGroup,
 	)
