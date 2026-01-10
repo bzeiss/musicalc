@@ -218,6 +218,18 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 	var refreshTable func()
 
 	// Mobile-friendly card list (2 lines per mic)
+	isMobile := fyne.CurrentDevice().IsMobile()
+	cardItemHeight := float32(0)
+	if isMobile {
+		textSize := theme.TextSize()
+		line1H := fyne.MeasureText("Ag", textSize, fyne.TextStyle{Bold: true}).Height
+		line2H := fyne.MeasureText("Ag", textSize, fyne.TextStyle{}).Height
+		if 16 > line1H {
+			line1H = 16
+		}
+		cardItemHeight = line1H + line2H + theme.Padding()*2 + 8
+	}
+
 	cardList := widget.NewList(
 		func() int {
 			return len(calc.Mics)
@@ -300,6 +312,11 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 		} else {
 			emptyMicsLabel.Hide()
 			cardList.Show()
+		}
+		if isMobile && cardItemHeight > 0 {
+			for i := 0; i < len(calc.Mics); i++ {
+				cardList.SetItemHeight(i, cardItemHeight)
+			}
 		}
 		cardList.Refresh()
 	}
