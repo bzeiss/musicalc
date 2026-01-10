@@ -228,9 +228,9 @@ func NewAlignmentDelayTabWithExport() (fyne.CanvasObject, func() (string, error)
 		removeIconSlot := container.NewGridWrap(fyne.NewSize(22, 16), container.NewCenter(removeIcon))
 		line1 := container.New(&cardLine1Layout{}, nameLabel, removeIconSlot)
 
-		distLabel := widget.NewLabel("\u00A0")
+		distLabel := widget.NewLabel("0")
 		distLabel.Truncation = fyne.TextTruncateClip
-		delayLabel := widget.NewLabel("\u00A0")
+		delayLabel := widget.NewLabel("0")
 		delayLabel.Alignment = fyne.TextAlignTrailing
 		delayLabel.Truncation = fyne.TextTruncateClip
 		line2 := container.NewHBox(distLabel, layout.NewSpacer(), delayLabel)
