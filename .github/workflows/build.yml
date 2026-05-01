@@ -211,7 +211,7 @@ jobs:
           go version
           clang --version
           xcrun --find lipo
-          hdiutil version
+          command -v hdiutil
 
       - name: Test
         run: go test ./...
