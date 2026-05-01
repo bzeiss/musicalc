@@ -85,8 +85,9 @@
 
 4. **Windows ARM64 Cross-compilation support (requires a more recent Ubuntu Server version for building)**
    - Download Zig from: https://ziglang.org/download/
-   - Put zig somewere into your environment PATH
-   - test by calling "zig" and "zig c++"
+   - Put `zig` somewhere into your environment `PATH`
+   - Test by calling `zig` and `zig c++`
+   - The Windows GoReleaser config stores Zig cache data under `build/.cache/zig-global` and `build/.cache/zig-local` so build-generated files stay inside the project tree.
 
 5. **Install Go dependencies**
    ```bash
@@ -139,6 +140,8 @@
    export CGO_ENABLED=1
    export CC="zig cc -target aarch64-windows-gnu"
    export CXX="zig c++ -target aarch64-windows-gnu"
+   export ZIG_GLOBAL_CACHE_DIR=build/.cache/zig-global
+   export ZIG_LOCAL_CACHE_DIR=build/.cache/zig-local
    export GOOS=windows
    export GOARCH=arm64
    go build -ldflags="-s -w" -o build/dist/musicalc_win_arm64.exe

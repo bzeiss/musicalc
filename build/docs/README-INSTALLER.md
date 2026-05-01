@@ -90,6 +90,8 @@ GoReleaser automates the creation of `.deb`, `.rpm`, and `.tar.gz` packages for 
    goreleaser release --clean --config build/release/goreleaser-win-all.yaml --skip=publish
    ```
 
+   The Windows ARM64 build uses Zig for cross-compilation. The GoReleaser config redirects Zig cache files to `build/.cache/zig-global` and `build/.cache/zig-local`.
+
    This creates packages in the `build/dist/` directory without requiring a Git tag.
 
 4. **Create a release (requires Git tag)**
