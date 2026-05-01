@@ -86,6 +86,7 @@ jobs:
           x86_64-w64-mingw32-gcc --version
           zig version
           iscc /?
+          if ($LASTEXITCODE -ne 0) { $global:LASTEXITCODE = 0 }
 
       - name: Test
         run: |
@@ -230,7 +231,33 @@ jobs:
 
       - name: Install Linux ARM64 cross dependencies
         run: |
+          . /etc/os-release
           sudo dpkg --add-architecture arm64
+          sudo mkdir -p /etc/apt/sources.list.d/disabled
+          sudo find /etc/apt/sources.list.d -maxdepth 1 -type f \( -name '*.sources' -o -name '*.list' \) -exec mv {} /etc/apt/sources.list.d/disabled/ \;
+          sudo tee /etc/apt/sources.list.d/ubuntu-amd64.sources >/dev/null <<EOF
+          Types: deb
+          URIs: http://archive.ubuntu.com/ubuntu
+          Suites: ${VERSION_CODENAME} ${VERSION_CODENAME}-updates ${VERSION_CODENAME}-backports
+          Components: main restricted universe multiverse
+          Architectures: amd64
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+          Types: deb
+          URIs: http://security.ubuntu.com/ubuntu
+          Suites: ${VERSION_CODENAME}-security
+          Components: main restricted universe multiverse
+          Architectures: amd64
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+          EOF
+          sudo tee /etc/apt/sources.list.d/ubuntu-arm64.sources >/dev/null <<EOF
+          Types: deb
+          URIs: http://ports.ubuntu.com/ubuntu-ports
+          Suites: ${VERSION_CODENAME} ${VERSION_CODENAME}-updates ${VERSION_CODENAME}-backports ${VERSION_CODENAME}-security
+          Components: main restricted universe multiverse
+          Architectures: arm64
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+          EOF
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends \
             gcc-aarch64-linux-gnu \
