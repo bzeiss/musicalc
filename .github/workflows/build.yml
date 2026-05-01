@@ -1,0 +1,282 @@
+name: Build Packages
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - "[0-9]*.[0-9]*.[0-9]*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  windows-installer:
+    name: Windows installer
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Audit runner image
+        run: |
+          "ImageOS=$env:ImageOS"
+          "ImageVersion=$env:ImageVersion"
+          Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OsHardwareAbstractionLayer
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.2"
+          check-latest: true
+          cache: true
+
+      - name: Set up MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          path-type: inherit
+          install: >-
+            mingw-w64-x86_64-gcc
+
+      - name: Set up Zig
+        uses: goto-bus-stop/setup-zig@v2
+        with:
+          version: "0.17.0-dev.215+8c5542bd3"
+
+      - name: Install Windows build tools
+        run: |
+          choco install llvm innosetup --yes --no-progress
+          $env:GITHUB_PATH | ForEach-Object {
+            Add-Content $_ "C:\Program Files\LLVM\bin"
+            Add-Content $_ "C:\msys64\mingw64\bin"
+            Add-Content $_ "C:\Program Files (x86)\Inno Setup 6"
+          }
+
+      - name: Set up GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          install-only: true
+          distribution: goreleaser
+          version: latest
+
+      - name: Audit toolchain
+        run: |
+          go version
+          goreleaser --version
+          clang --version
+          x86_64-w64-mingw32-gcc --version
+          zig version
+          iscc /?
+
+      - name: Test
+        run: |
+          New-Item -ItemType Directory -Force build\.cache\gobuildtmp, build\.cache\gocache | Out-Null
+          $env:TEMP=(Resolve-Path build\.cache\gobuildtmp).Path
+          $env:TMP=$env:TEMP
+          $env:GOTMPDIR=$env:TEMP
+          $env:GOCACHE=(Resolve-Path build\.cache\gocache).Path
+          $env:CGO_ENABLED='1'
+          $env:CC='clang --target=x86_64-w64-windows-gnu'
+          $env:CXX='clang++ --target=x86_64-w64-windows-gnu'
+          $env:GOFLAGS='-ldflags=-extld=x86_64-w64-mingw32-gcc'
+          go test ./...
+
+      - name: Check GoReleaser config
+        run: goreleaser check --config build\release\goreleaser-win-all.yaml
+
+      - name: Build Windows binaries
+        run: |
+          New-Item -ItemType Directory -Force build\.cache\gobuildtmp, build\.cache\gocache | Out-Null
+          $env:TEMP=(Resolve-Path build\.cache\gobuildtmp).Path
+          $env:TMP=$env:TEMP
+          $env:GOTMPDIR=$env:TEMP
+          $env:GOCACHE=(Resolve-Path build\.cache\gocache).Path
+          goreleaser build --snapshot --clean --config build\release\goreleaser-win-all.yaml
+
+      - name: Build Windows installer
+        run: .\build\scripts\build-installer.ps1
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: musicalc-windows
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            build/dist/musicalc_x64.exe
+            build/dist/musicalc_arm64.exe
+            build/dist/installer/*.exe
+            build/dist/artifacts.json
+            build/dist/metadata.json
+
+  linux-amd64-packages:
+    name: Linux AMD64 packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Audit runner image
+        run: |
+          echo "ImageOS=${ImageOS}"
+          echo "ImageVersion=${ImageVersion}"
+          lsb_release -a
+          uname -a
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.2"
+          check-latest: true
+          cache: true
+
+      - name: Install Linux AMD64 dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            gcc \
+            g++ \
+            libasound2-dev \
+            libgl1-mesa-dev \
+            pkg-config \
+            rpm \
+            xorg-dev
+
+      - name: Set up GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          install-only: true
+          distribution: goreleaser
+          version: latest
+
+      - name: Audit toolchain
+        run: |
+          go version
+          goreleaser --version
+          gcc --version
+          g++ --version
+          pkg-config --version
+          rpm --version
+
+      - name: Test
+        run: go test ./...
+
+      - name: Check GoReleaser config
+        run: goreleaser check --config build/release/goreleaser-linux-amd64.yaml
+
+      - name: Build Linux AMD64 packages
+        run: goreleaser release --snapshot --clean --config build/release/goreleaser-linux-amd64.yaml --skip=publish
+
+      - name: Upload Linux AMD64 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: musicalc-linux-amd64
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            build/dist/*.tar.gz
+            build/dist/*.deb
+            build/dist/*.rpm
+            build/dist/artifacts.json
+            build/dist/metadata.json
+
+  linux-arm64-packages:
+    name: Linux ARM64 packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Audit runner image
+        run: |
+          echo "ImageOS=${ImageOS}"
+          echo "ImageVersion=${ImageVersion}"
+          lsb_release -a
+          uname -a
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.2"
+          check-latest: true
+          cache: true
+
+      - name: Install Linux ARM64 cross dependencies
+        run: |
+          sudo dpkg --add-architecture arm64
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            gcc-aarch64-linux-gnu \
+            g++-aarch64-linux-gnu \
+            libasound2-dev:arm64 \
+            libgl1-mesa-dev:arm64 \
+            libxcursor-dev:arm64 \
+            libxi-dev:arm64 \
+            libxinerama-dev:arm64 \
+            libxrandr-dev:arm64 \
+            libx11-dev:arm64 \
+            libxxf86vm-dev:arm64 \
+            pkg-config \
+            rpm
+
+      - name: Set up GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          install-only: true
+          distribution: goreleaser
+          version: latest
+
+      - name: Audit toolchain
+        run: |
+          go version
+          goreleaser --version
+          aarch64-linux-gnu-gcc --version
+          aarch64-linux-gnu-g++ --version
+          pkg-config --version
+          rpm --version
+
+      - name: Check GoReleaser config
+        run: goreleaser check --config build/release/goreleaser-linux-arm64.yaml
+
+      - name: Build Linux ARM64 packages
+        run: goreleaser release --snapshot --clean --config build/release/goreleaser-linux-arm64.yaml --skip=publish
+
+      - name: Upload Linux ARM64 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: musicalc-linux-arm64
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            build/dist/*.tar.gz
+            build/dist/*.deb
+            build/dist/*.rpm
+            build/dist/artifacts.json
+            build/dist/metadata.json
