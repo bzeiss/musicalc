@@ -96,14 +96,14 @@ This application is provided for informational purposes only and is not guarante
 ## Documentation
 
 - **[User Guide](README-USERGUIDE.md)** - How to use each calculator
-- **[Build Instructions](README-BUILD.md)** - How to build from source on Windows, Linux, and macOS
-- **[Creating Installers](README-INSTALLER.md)** - Creating Windows installers and Linux packages
-- **[Icon Resources](README-ICONS.md)** - Icon specifications and resources
-- **[Test Instructions](README-TESTS.md)** - How to run tests
+- **[Build Instructions](build/docs/README-BUILD.md)** - How to build from source on Windows, Linux, and macOS
+- **[Creating Installers](build/docs/README-INSTALLER.md)** - Creating Windows installers and Linux packages
+- **[Icon Resources](build/docs/README-ICONS.md)** - Icon specifications and resources
+- **[Test Instructions](build/docs/README-TESTS.md)** - How to run tests
 
 ## Requirements
 
-- Go 1.24.5 or later
+- Go 1.26.2 or later
 - GCC/MinGW (for CGO support on Windows)
 - Fyne v2.7.1
 

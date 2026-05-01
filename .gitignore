@@ -17,10 +17,11 @@ musicalc
 coverage.*
 *.coverprofile
 profile.cov
-installer
-installer/*
-dist
-dist/*
+/installer/
+/dist/
+build/dist/
+build/.cache/
+build/installer/out/
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
@@ -43,6 +44,6 @@ musicalc.apk
 fyne-cross
 fyne-cross/*
 
-# Local Go build/cache directories used in sandboxed builds
+# Legacy local Go build/cache directories
 .gobuildtmp/
 .gocache/

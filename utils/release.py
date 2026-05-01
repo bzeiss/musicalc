@@ -47,7 +47,7 @@ def update_version_file(project_root, new_version):
 
 def update_inno_setup(project_root, new_version):
     """Update version in musicalc.iss Inno Setup script"""
-    iss_file = project_root / "musicalc.iss"
+    iss_file = project_root / "build" / "installer" / "musicalc.iss"
     
     if not iss_file.exists():
         print(f"✗ Error: {iss_file} not found")
@@ -79,8 +79,8 @@ def update_inno_setup(project_root, new_version):
 def update_desktop_files(project_root, new_version):
     """Update version in .desktop files (StartupWMClass field)"""
     desktop_files = [
-        project_root / "musicalc.desktop",
-        project_root / "musicalc-pkg.desktop"
+        project_root / "build" / "packaging" / "musicalc.desktop",
+        project_root / "build" / "packaging" / "musicalc-pkg.desktop"
     ]
     
     success = True
@@ -202,7 +202,7 @@ def main():
     print("═" * 50)
     
     # Stage files
-    if not run_command("git add VERSION musicalc.iss musicalc.desktop musicalc-pkg.desktop go.mod go.sum", project_root, "Staging files"):
+    if not run_command("git add VERSION build/installer/musicalc.iss build/packaging/musicalc.desktop build/packaging/musicalc-pkg.desktop go.mod go.sum", project_root, "Staging files"):
         sys.exit(1)
     
     # Check if there are changes to commit
@@ -246,7 +246,7 @@ def main():
     print(f"Commit: {commit_message}")
     print()
     print("Next steps:")
-    print("  1. Build the application: go build -ldflags=\"-s -w -H=windowsgui\" -o musicalc.exe")
+    print("  1. Build the application: ./build/scripts/build-win.ps1")
     print("  2. Test the application")
     print("  3. Create installer (if using Inno Setup)")
 
