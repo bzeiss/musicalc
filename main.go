@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"musicalc/internal/ui"
 	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -20,9 +22,9 @@ type CategoryInfo struct {
 }
 
 // createCompactHeader creates a compact header with: hamburger + "category / tab heading"
-func createCompactHeader(window fyne.Window, categories []CategoryInfo, switchCategory func(int), headerLabel *widget.Label) *fyne.Container {
+func createCompactHeader(window fyne.Window, categories []CategoryInfo, switchCategory func(int), showAbout func(), headerLabel *widget.Label) *fyne.Container {
 	menuButton := widget.NewButtonWithIcon("", theme.MenuIcon(), func() {
-		showCategoryMenu(window, categories, switchCategory)
+		showCategoryMenu(window, categories, switchCategory, showAbout)
 	})
 	menuButton.Importance = widget.LowImportance
 	return container.NewHBox(menuButton, container.NewCenter(headerLabel))
@@ -32,12 +34,7 @@ func main() {
 	myApp := app.NewWithID("com.musicalc")
 	myApp.Settings().SetTheme(ui.NewCustomTheme())
 
-	ver := strings.TrimSpace(version)
-	windowTitle := "MusiCalc"
-	if ver != "" {
-		windowTitle = "MusiCalc v" + ver
-	}
-	window := myApp.NewWindow(windowTitle)
+	window := myApp.NewWindow("MusiCalc")
 	window.Resize(fyne.NewSize(450, 650))
 	window.SetFixedSize(true)
 
@@ -199,7 +196,9 @@ func main() {
 	}
 
 	// Create initial header and content
-	header := createCompactHeader(window, categories, switchCategory, headerLabel)
+	header := createCompactHeader(window, categories, switchCategory, func() {
+		showAboutDialog(window)
+	}, headerLabel)
 
 	content := container.NewBorder(
 		container.NewVBox(header, widget.NewSeparator()),
@@ -211,7 +210,7 @@ func main() {
 }
 
 // showCategoryMenu displays a popup menu for category selection
-func showCategoryMenu(window fyne.Window, categories []CategoryInfo, onSelect func(int)) {
+func showCategoryMenu(window fyne.Window, categories []CategoryInfo, onSelect func(int), showAbout func()) {
 	var menuItems []*fyne.MenuItem
 
 	for i, category := range categories {
@@ -220,8 +219,19 @@ func showCategoryMenu(window fyne.Window, categories []CategoryInfo, onSelect fu
 			onSelect(index)
 		}))
 	}
+	menuItems = append(menuItems, fyne.NewMenuItemSeparator(), fyne.NewMenuItem("About", showAbout))
 
 	menu := fyne.NewMenu("Categories", menuItems...)
 	popupMenu := widget.NewPopUpMenu(menu, window.Canvas())
 	popupMenu.ShowAtPosition(fyne.NewPos(10, 50))
+}
+
+func showAboutDialog(window fyne.Window) {
+	ver := strings.TrimSpace(version)
+	if ver == "" {
+		ver = "dev"
+	}
+
+	message := fmt.Sprintf("MusiCalc\n\nVersion: %s\n\nMusic calculator utility for Windows and Linux.", ver)
+	dialog.ShowInformation("About MusiCalc", message, window)
 }
