@@ -232,6 +232,6 @@ func showAboutDialog(window fyne.Window) {
 		ver = "dev"
 	}
 
-	message := fmt.Sprintf("MusiCalc\n\nVersion: %s\n\nMusic calculator utility for Windows and Linux.", ver)
+	message := fmt.Sprintf("MusiCalc\n\nVersion: %s\n\nMusic calculator utility.", ver)
 	dialog.ShowInformation("About MusiCalc", message, window)
 }
