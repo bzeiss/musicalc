@@ -39,8 +39,6 @@ go.work.sum
 
 musicalc_linux_*
 musicalc_win_*
-musicalc.apk
-
 fyne-cross
 fyne-cross/*
 

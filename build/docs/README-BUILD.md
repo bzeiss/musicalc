@@ -144,22 +144,7 @@
    go build -ldflags="-s -w" -o build/dist/musicalc_win_arm64.exe
    ```
 
-10. **Build the application for Android ARM64**
-   ```bash
-   export ANDROID_NDK_HOME=/path/to/your/android-ndk
-   export ANDROID_HOME=/path/to/your/android-sdk
-   export ANDROID_SDK_ROOT=$ANDROID_HOME
-   export PATH=$PATH:${ANDROID_HOME}/cmdline-tools/latest/bin
-   ./build/scripts/build-android.sh
-   ```
-
-   For the Android SDK and NDK, you can use the Android Studio SDK Manager to install them.
-   ```bash
-   sdkmanager --licenses # accept all licenses
-   sdkmanager "platform-tools" "build-tools;36.1.0" "platforms;android-36" # choose the most recent version
-   ```
-
-11. **Run the application**
+10. **Run the application**
    ```bash
    ./build/dist/musicalc_xxx
    ```
