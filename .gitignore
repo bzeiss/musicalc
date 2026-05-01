@@ -42,3 +42,7 @@ musicalc.apk
 
 fyne-cross
 fyne-cross/*
+
+# Local Go build/cache directories used in sandboxed builds
+.gobuildtmp/
+.gocache/
