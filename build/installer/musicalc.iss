@@ -2,7 +2,9 @@
 ; Music Calculator Application - Universal Architecture Version
 
 #define MyAppName "MusiCalc"
-#define MyAppVersion "0.8.6"
+#ifndef MyAppVersion
+  #error MyAppVersion must be supplied by the build command, for example: ISCC.exe /DMyAppVersion=X.Y.Z build\installer\musicalc.iss
+#endif
 #define MyAppPublisher "B. Zeiss"
 #define MyAppURL "https://github.com/bzeiss/musicalc"
 #define MyAppExeName "musicalc.exe"
@@ -19,9 +21,9 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
 ; PrivilegesRequired=lowest
-OutputDir=installer
+OutputDir=..\dist\installer
 OutputBaseFilename=musicalc-setup-{#MyAppVersion}
-SetupIconFile=icons\appicon.ico
+SetupIconFile=..\..\icons\appicon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -42,14 +44,14 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 ; 1. Install AMD64 version on x64 systems
-Source: "dist\musicalc_x64.exe"; DestDir: "{app}"; DestName: "{#MyAppExeName}"; Check: IsX64; Flags: 64bit ignoreversion
+Source: "..\dist\musicalc_x64.exe"; DestDir: "{app}"; DestName: "{#MyAppExeName}"; Check: IsX64; Flags: 64bit ignoreversion
 
 ; 2. Install ARM64 version on ARM64 systems
-Source: "dist\musicalc_arm64.exe"; DestDir: "{app}"; DestName: "{#MyAppExeName}"; Check: IsArm64; Flags: 64bit ignoreversion
+Source: "..\dist\musicalc_arm64.exe"; DestDir: "{app}"; DestName: "{#MyAppExeName}"; Check: IsArm64; Flags: 64bit ignoreversion
 
 ; Common files
-Source: "icons\appicon.ico"; DestDir: "{app}"; Flags: ignoreversion
-Source: "icons\appicon.png"; DestDir: "{app}\icons"; Flags: ignoreversion
+Source: "..\..\icons\appicon.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\icons\appicon.png"; DestDir: "{app}\icons"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\appicon.ico"

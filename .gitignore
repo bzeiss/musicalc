@@ -17,10 +17,11 @@ musicalc
 coverage.*
 *.coverprofile
 profile.cov
-installer
-installer/*
-dist
-dist/*
+/installer/
+/dist/
+build/dist/
+build/.cache/
+build/installer/out/
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
@@ -38,7 +39,9 @@ go.work.sum
 
 musicalc_linux_*
 musicalc_win_*
-musicalc.apk
-
 fyne-cross
 fyne-cross/*
+
+# Legacy local Go build/cache directories
+.gobuildtmp/
+.gocache/

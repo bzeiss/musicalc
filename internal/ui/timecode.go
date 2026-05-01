@@ -108,6 +108,13 @@ func NewTimecodeTab() fyne.CanvasObject {
 			resultTC, maxWidth, resultFrames, fpsLabel)
 	}
 
+	pushHistory := func(entry string) {
+		historyList = append([]string{entry}, historyList...)
+		historyText.SetText(strings.Join(historyList, "\n\n"))
+		historyText.Refresh()
+		historyScroll.ScrollToTop()
+	}
+
 	// Track previous FPS for conversion history
 	var previousFPS string
 	previousFPS = "30 fps"
@@ -156,10 +163,7 @@ func NewTimecodeTab() fyne.CanvasObject {
 
 				conversionEntry := fmt.Sprintf("  %s (%*df) @%s\n= %s (%*df) @%s",
 					oldTC, maxWidth, oldFrames, oldFpsLabel, newTC, maxWidth, newFrames, newFpsLabel)
-				historyList = append(historyList, conversionEntry)
-				historyText.SetText(strings.Join(historyList, "\n\n"))
-				historyText.Refresh()
-				historyScroll.ScrollToBottom()
+				pushHistory(conversionEntry)
 
 				// Timecode H:M:S:F values don't change, only recalculate display with new FPS
 				// No need to update entry fields since H:M:S:F stay the same
@@ -189,10 +193,7 @@ func NewTimecodeTab() fyne.CanvasObject {
 
 		fpsLabel := strings.Split(fpsSelect.Selected, " ")[0]
 		historyEntry := formatHistoryEntry(tc1, frames1, tc2, frames2, result.Timecode, result.TotalFrames, fpsLabel, "+")
-		historyList = append(historyList, historyEntry)
-		historyText.SetText(strings.Join(historyList, "\n\n"))
-		historyText.Refresh()
-		historyScroll.ScrollToBottom()
+		pushHistory(historyEntry)
 
 		// Update first timecode with result and reset second timecode
 		updating = true
@@ -223,10 +224,7 @@ func NewTimecodeTab() fyne.CanvasObject {
 
 		fpsLabel := strings.Split(fpsSelect.Selected, " ")[0]
 		historyEntry := formatHistoryEntry(tc1, frames1, tc2, frames2, result.Timecode, result.TotalFrames, fpsLabel, "-")
-		historyList = append(historyList, historyEntry)
-		historyText.SetText(strings.Join(historyList, "\n\n"))
-		historyText.Refresh()
-		historyScroll.ScrollToBottom()
+		pushHistory(historyEntry)
 
 		// Update first timecode with result and reset second timecode
 		updating = true

@@ -2,8 +2,8 @@
 Type=Application
 Name=MusiCalc
 Comment=Music Calculator Utility
-Exec=/usr/bin/musicalc
+Exec=/usr/local/bin/musicalc
 Icon=musicalc
 Terminal=false
 Categories=Utility;Audio;
-StartupWMClass=MusiCalc v0.8.6
+StartupWMClass=com.musicalc

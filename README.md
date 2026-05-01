@@ -2,7 +2,7 @@
 
 A cross-platform music calculator application built with Go and Fyne. Provides real-time calculators for tempo, pitch, sampling, and time-stretching operations commonly used in music production and audio engineering.
 
-This project is heavily inspired by [MusicMath](https://dev.laurentcolson.com/musicmath.html), an excellent tool currently exclusive to the Apple ecosystem. This version aims to bring that same utility to Windows, Linux and Android, with a simpler look and feel. For macOS users looking for a polished commercial solution, MusicMath is highly recommended. MusicMath has long been a reference tool for music-related calculations, and this project draws inspiration from that work.
+This project is heavily inspired by [MusicMath](https://dev.laurentcolson.com/musicmath.html), an excellent tool currently exclusive to the Apple ecosystem. This version aims to bring that same utility to Windows and Linux, with a simpler look and feel. For macOS users looking for a polished commercial solution, MusicMath is highly recommended. MusicMath has long been a reference tool for music-related calculations, and this project draws inspiration from that work.
 
 <table style="width: 100%;" border="0">
   <tr>
@@ -96,16 +96,16 @@ This application is provided for informational purposes only and is not guarante
 ## Documentation
 
 - **[User Guide](README-USERGUIDE.md)** - How to use each calculator
-- **[Build Instructions](README-BUILD.md)** - How to build from source on Windows, Linux, and macOS
-- **[Creating Installers](README-INSTALLER.md)** - Creating Windows installers and Linux packages
-- **[Icon Resources](README-ICONS.md)** - Icon specifications and resources
-- **[Test Instructions](README-TESTS.md)** - How to run tests
+- **[Build Instructions](build/docs/README-BUILD.md)** - How to build from source on Windows, Linux, and macOS
+- **[Creating Installers](build/docs/README-INSTALLER.md)** - Creating Windows installers and Linux packages
+- **[Icon Resources](build/docs/README-ICONS.md)** - Icon specifications and resources
+- **[Test Instructions](build/docs/README-TESTS.md)** - How to run tests
 
 ## Requirements
 
-- Go 1.24.5 or later
+- Go 1.26.2 or later
 - GCC/MinGW (for CGO support on Windows)
-- Fyne v2.7.1
+- Fyne v2.7.3
 
 ## License
 

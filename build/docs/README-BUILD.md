@@ -10,9 +10,10 @@
    cd musicalc
    ```
 
-2. **Install MSYS2** (provides MinGW GCC compiler required for Fyne)
+2. **Install LLVM and MSYS2** (provides clang plus the MinGW linker required for Fyne)
    ```powershell
    winget install -e --id MSYS2.MSYS2
+   winget install -e --id LLVM.LLVM
    ```
 
 3. **Install GCC via MSYS2**
@@ -32,11 +33,12 @@
    - Add new entry: `C:\msys64\mingw64\bin`
    - Click OK and restart your terminal
 
-5. **Verify GCC installation**
+5. **Verify compiler installation**
    ```powershell
-   gcc --version
+   clang --version
+   x86_64-w64-mingw32-gcc --version
    ```
-   Should output GCC version information
+   Both commands should output version information.
 
 6. **Install Go dependencies**
    ```powershell
@@ -45,19 +47,13 @@
 
 7. **Build the application**
    ```powershell
-   $env:CGO_FLAGS="-O3 -flto=auto -march=x86-64-v3"
-   $env:CGO_LDFLAGS="-O3 -flto=auto"
-   $env:CGO_ENABLED=1
-   go build -ldflags="-s -w" -o musicalc.exe
+   .\build\scripts\build-win.ps1
    ```
-   or for a production build without the console:
-   ```powershell
-   go build -ldflags="-s -w -H=windowsgui" -o musicalc.exe
-   ```
+   The script injects the application version from the current Git tag. If the current commit is not exactly tagged, it injects a local dev version derived from the latest tag and commit.
 
 8. **Run the application**
    ```powershell
-   .\musicalc.exe
+   .\build\dist\musicalc.exe
    ```
 
 ## Linux
@@ -90,8 +86,9 @@
 
 4. **Windows ARM64 Cross-compilation support (requires a more recent Ubuntu Server version for building)**
    - Download Zig from: https://ziglang.org/download/
-   - Put zig somewere into your environment PATH
-   - test by calling "zig" and "zig c++"
+   - Put `zig` somewhere into your environment `PATH`
+   - Test by calling `zig` and `zig c++`
+   - The Windows GoReleaser config stores Zig cache data under `build/.cache/zig-global` and `build/.cache/zig-local` so build-generated files stay inside the project tree.
 
 5. **Install Go dependencies**
    ```bash
@@ -100,6 +97,7 @@
 
 6. **Build the application for Linux AMD64**
    ```bash
+   mkdir -p build/dist
    export CGO_CFLAGS="-O3 -flto=auto -march=x86-64-v3"
    export CGO_LDFLAGS="-O3 -flto=auto"
    export CGO_ENABLED=1
@@ -107,10 +105,12 @@
    export CXX=g++
    export GOOS=linux
    export GOARCH=amd64
-   go build -ldflags="-s -w" -o musicalc_linux_amd64
+   VERSION="$(git describe --tags --exact-match 2>/dev/null || echo dev-$(git rev-parse --short HEAD))"
+   go build -ldflags="-s -w -X main.version=${VERSION}" -o build/dist/musicalc_linux_amd64
    ```
 7. **Build the application for Linux ARM64**
    ```bash
+   mkdir -p build/dist
    export CGO_CFLAGS="-O3 -flto=auto -march=armv8.4-a+crc+crypto -fomit-frame-pointer"
    export CGO_LDFLAGS="-O3 -flto=auto -Wl,--gc-sections"
    export CGO_ENABLED=1
@@ -118,11 +118,13 @@
    export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig
    export GOOS=linux
    export GOARCH=arm64
-   go build -ldflags="-s -w" -o musicalc_linux_arm64
+   VERSION="$(git describe --tags --exact-match 2>/dev/null || echo dev-$(git rev-parse --short HEAD))"
+   go build -ldflags="-s -w -X main.version=${VERSION}" -o build/dist/musicalc_linux_arm64
    ```
 
 8. **Build the application for Windows AMD64**
    ```bash
+   mkdir -p build/dist
    export CGO_CFLAGS="-O3 -flto=auto -march=x86-64-v3 -m64"
    export CGO_LDFLAGS="-O3 -flto=auto"
    export CGO_ENABLED=1
@@ -130,46 +132,33 @@
    export CXX=x86_64-w64-mingw32-g++
    export GOOS=windows
    export GOARCH=amd64
-   go build -ldflags="-s -w" -o musicalc_win_amd64
+   VERSION="$(git describe --tags --exact-match 2>/dev/null || echo dev-$(git rev-parse --short HEAD))"
+   go build -ldflags="-s -w -X main.version=${VERSION}" -o build/dist/musicalc_win_amd64.exe
    ```
 
 9. **Build the application for Windows ARM64**
    ```bash
+   mkdir -p build/dist
    export CGO_CFLAGS="-O3 -mcpu=oryon_1 -fomit-frame-pointer"
    export CGO_LDFLAGS="-O3"
    export CGO_ENABLED=1
    export CC="zig cc -target aarch64-windows-gnu"
    export CXX="zig c++ -target aarch64-windows-gnu"
+   export ZIG_GLOBAL_CACHE_DIR=build/.cache/zig-global
+   export ZIG_LOCAL_CACHE_DIR=build/.cache/zig-local
    export GOOS=windows
    export GOARCH=arm64
-   go build -ldflags="-s -w" -o musicalc_win_arm64
+   VERSION="$(git describe --tags --exact-match 2>/dev/null || echo dev-$(git rev-parse --short HEAD))"
+   go build -ldflags="-s -w -X main.version=${VERSION}" -o build/dist/musicalc_win_arm64.exe
    ```
 
-10. **Build the application for Android ARM64**
+10. **Run the application**
    ```bash
-   export ANDROID_NDK_HOME=/path/to/your/android-ndk
-   export ANDROID_HOME=/path/to/your/android-sdk
-   export ANDROID_SDK_ROOT=$ANDROID_HOME
-   export PATH=$PATH:${ANDROID_HOME}/cmdline-tools/latest/bin
-   ./build-android.sh
-   ```
-
-   For the Android SDK and NDK, you can use the Android Studio SDK Manager to install them.
-   ```bash
-   sdkmanager --licenses # accept all licenses
-   sdkmanager "platform-tools" "build-tools;36.1.0" "platforms;android-36" # choose the most recent version
-   ```
-
-11. **Run the application**
-   ```bash
-   ./musicalc_xxx
+   ./build/dist/musicalc_xxx
    ```
 
 ## Requirements
 
-- Go 1.24.5 or later
+- Go 1.26.2 or later
 - GCC/MinGW (for CGO support on Windows)
-- Fyne v2.7.1
-
-- GCC/MinGW (for CGO support on Windows)
-- Fyne v2.7.1
+- Fyne v2.7.3
