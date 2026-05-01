@@ -178,6 +178,69 @@ jobs:
             build/dist/artifacts.json
             build/dist/metadata.json
 
+  macos-universal-dmg:
+    name: macOS universal DMG
+    needs: version
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      MUSICALC_VERSION: ${{ needs.version.outputs.package_version }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Audit runner image
+        run: |
+          sw_vers
+          uname -a
+          uname -m
+          xcodebuild -version
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.26.2"
+          check-latest: true
+          cache: true
+
+      - name: Audit toolchain
+        run: |
+          go version
+          clang --version
+          lipo -version
+          hdiutil version
+
+      - name: Test
+        run: go test ./...
+
+      - name: Build macOS universal app and DMG
+        run: bash build/scripts/build-macos.sh
+
+      - name: Verify macOS artifacts
+        run: |
+          test -d build/dist/macos/MusiCalc.app
+          test -f "build/dist/macos/MusiCalc_${MUSICALC_VERSION}_universal.app.zip"
+          test -f "build/dist/macos/musicalc_${MUSICALC_VERSION}_universal.dmg"
+          plutil -lint build/dist/macos/MusiCalc.app/Contents/Info.plist
+          lipo -info build/dist/macos/MusiCalc.app/Contents/MacOS/MusiCalc | tee build/dist/macos/lipo-info.txt
+          grep -q "x86_64" build/dist/macos/lipo-info.txt
+          grep -q "arm64" build/dist/macos/lipo-info.txt
+          hdiutil verify "build/dist/macos/musicalc_${MUSICALC_VERSION}_universal.dmg"
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: musicalc-macos
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            build/dist/macos/*.dmg
+            build/dist/macos/*.zip
+            build/dist/macos/lipo-info.txt
+
   linux-amd64-packages:
     name: Linux AMD64 packages
     needs: version
