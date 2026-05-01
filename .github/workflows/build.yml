@@ -57,14 +57,9 @@ jobs:
           install: >-
             mingw-w64-x86_64-gcc
 
-      - name: Set up Zig
-        uses: goto-bus-stop/setup-zig@v2
-        with:
-          version: "0.17.0-dev.215+8c5542bd3"
-
       - name: Install Windows build tools
         run: |
-          choco install llvm innosetup --yes --no-progress
+          choco install llvm innosetup zig --yes --no-progress
           $env:GITHUB_PATH | ForEach-Object {
             Add-Content $_ "C:\Program Files\LLVM\bin"
             Add-Content $_ "C:\msys64\mingw64\bin"
@@ -76,7 +71,7 @@ jobs:
         with:
           install-only: true
           distribution: goreleaser
-          version: latest
+          version: "~> v2"
 
       - name: Audit toolchain
         run: |
@@ -170,7 +165,7 @@ jobs:
         with:
           install-only: true
           distribution: goreleaser
-          version: latest
+          version: "~> v2"
 
       - name: Audit toolchain
         run: |
@@ -251,7 +246,7 @@ jobs:
         with:
           install-only: true
           distribution: goreleaser
-          version: latest
+          version: "~> v2"
 
       - name: Audit toolchain
         run: |
