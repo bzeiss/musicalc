@@ -210,7 +210,7 @@ jobs:
         run: |
           go version
           clang --version
-          lipo -version
+          xcrun --find lipo
           hdiutil version
 
       - name: Test
