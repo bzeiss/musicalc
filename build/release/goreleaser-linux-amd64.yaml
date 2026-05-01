@@ -23,9 +23,12 @@ builds:
   
 # This creates the .tar.gz bundle
 archives:
-  - files:
+  - wrap_in_directory: musicalc
+    files:
       - src: "build/scripts/install.sh"
         dst: "install.sh"
+        info:
+          mode: 493
       - src: "icons/appicon.png"
         dst: "icon.png"
       - src: "build/packaging/musicalc.desktop"
