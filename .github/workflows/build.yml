@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -43,7 +43,7 @@ jobs:
           Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OsHardwareAbstractionLayer
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: "1.26.2"
           check-latest: true
@@ -60,7 +60,7 @@ jobs:
       - name: Set up Zig
         uses: goto-bus-stop/setup-zig@v2
         with:
-          version: "0.17.0-dev.215+8c5542bd3"
+          version: master
 
       - name: Install Windows build tools
         run: |
@@ -72,7 +72,7 @@ jobs:
           }
 
       - name: Set up GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           install-only: true
           distribution: goreleaser
@@ -116,7 +116,7 @@ jobs:
         run: .\build\scripts\build-installer.ps1
 
       - name: Upload Windows artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: musicalc-windows
           if-no-files-found: error
@@ -135,7 +135,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -147,7 +147,7 @@ jobs:
           uname -a
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: "1.26.2"
           check-latest: true
@@ -166,7 +166,7 @@ jobs:
             xorg-dev
 
       - name: Set up GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           install-only: true
           distribution: goreleaser
@@ -191,7 +191,7 @@ jobs:
         run: goreleaser release --snapshot --clean --config build/release/goreleaser-linux-amd64.yaml --skip=publish
 
       - name: Upload Linux AMD64 artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: musicalc-linux-amd64
           if-no-files-found: error
@@ -210,7 +210,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -222,7 +222,7 @@ jobs:
           uname -a
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: "1.26.2"
           check-latest: true
@@ -247,7 +247,7 @@ jobs:
             rpm
 
       - name: Set up GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           install-only: true
           distribution: goreleaser
@@ -269,7 +269,7 @@ jobs:
         run: goreleaser release --snapshot --clean --config build/release/goreleaser-linux-arm64.yaml --skip=publish
 
       - name: Upload Linux ARM64 artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: musicalc-linux-arm64
           if-no-files-found: error
