@@ -1,4 +1,5 @@
 param(
+    [string]$Version,
     [switch]$Release
 )
 
@@ -10,28 +11,43 @@ $installerScript = Join-Path $projectRoot "build\installer\musicalc.iss"
 
 Push-Location $projectRoot
 try {
-    $version = git describe --tags --exact-match 2>$null
-    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($version)) {
-        if ($Release) {
+    $versionValue = $Version
+
+    if ([string]::IsNullOrWhiteSpace($versionValue)) {
+        $versionValue = git describe --tags --exact-match 2>$null
+        if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($versionValue)) {
+            if ($Release) {
+                throw "Release installer builds require HEAD to be exactly on a version tag."
+            }
+
+            $latestTag = git describe --tags --abbrev=0 2>$null
+            $shortCommit = git rev-parse --short HEAD
+            if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($shortCommit)) {
+                $versionValue = "dev"
+            } elseif ([string]::IsNullOrWhiteSpace($latestTag)) {
+                $versionValue = "dev-$shortCommit"
+            } else {
+                $versionValue = "$latestTag-dev-$shortCommit"
+            }
+        }
+    } elseif ($Release) {
+        $tagVersion = git describe --tags --exact-match 2>$null
+        if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($tagVersion)) {
             throw "Release installer builds require HEAD to be exactly on a version tag."
-        }
-
-        $latestTag = git describe --tags --abbrev=0 2>$null
-        $shortCommit = git rev-parse --short HEAD
-        if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($shortCommit)) {
-            $version = "dev"
-        } elseif ([string]::IsNullOrWhiteSpace($latestTag)) {
-            $version = "dev-$shortCommit"
-        } else {
-            $version = "$latestTag-dev-$shortCommit"
+        } elseif ($versionValue -ne $tagVersion) {
+            throw "Release version '$versionValue' does not match exact Git tag '$tagVersion'."
         }
     }
 
-    if ($Release -and ($version -notmatch '^\d+\.\d+\.\d+$')) {
-        throw "Release tag '$version' is invalid. Expected MAJOR.MINOR.PATCH, for example 0.8.7."
+    if ($Release -and ($versionValue -notmatch '^\d+\.\d+\.\d+$')) {
+        throw "Release tag '$versionValue' is invalid. Expected MAJOR.MINOR.PATCH, for example 0.8.7."
     }
 
-    iscc "/DMyAppVersion=$version" $installerScript
+    if ($versionValue -notmatch '^[0-9A-Za-z][0-9A-Za-z.-]*$') {
+        throw "Installer version '$versionValue' is invalid. Use only letters, numbers, dots, and hyphens."
+    }
+
+    iscc "/DMyAppVersion=$versionValue" $installerScript
     $exitCode = $LASTEXITCODE
 } finally {
     Pop-Location
