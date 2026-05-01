@@ -2,11 +2,6 @@ version: 2
 project_name: musicalc
 dist: build/dist
 
-before:
-  hooks:
-    - git pull && git checkout -- go.mod && git fetch --tags --force
-#    - go mod tidy
-
 builds:
   - id: linux-amd64
     env:
@@ -21,7 +16,7 @@ builds:
       - amd64
     goamd64: [v3]
     ldflags:
-      - -s -w
+      - -s -w -X main.version={{ .Version }}
   
 # This creates the .tar.gz bundle
 archives:

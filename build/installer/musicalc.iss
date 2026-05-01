@@ -2,7 +2,9 @@
 ; Music Calculator Application - Universal Architecture Version
 
 #define MyAppName "MusiCalc"
-#define MyAppVersion "0.8.6"
+#ifndef MyAppVersion
+  #error MyAppVersion must be supplied by the build command, for example: ISCC.exe /DMyAppVersion=X.Y.Z build\installer\musicalc.iss
+#endif
 #define MyAppPublisher "B. Zeiss"
 #define MyAppURL "https://github.com/bzeiss/musicalc"
 #define MyAppExeName "musicalc.exe"

@@ -2,11 +2,6 @@ version: 2
 project_name: musicalc
 dist: build/dist
 
-before:
-  hooks:
-    - git pull && git checkout -- go.mod && git fetch --tags --force
-#    - go mod tidy
-
 builds:
   - id: win-amd64
     env:
@@ -19,7 +14,7 @@ builds:
     goarch: [amd64]
     goamd64: [v3]
     ldflags:
-      - -s -w -H=windowsgui -extld=x86_64-w64-mingw32-gcc
+      - -s -w -H=windowsgui -extld=x86_64-w64-mingw32-gcc -X main.version={{ .Version }}
     binary: musicalc_x64
     # This keeps the binary at the top level of the dist folder
     no_unique_dist_dir: true
@@ -36,7 +31,7 @@ builds:
     goos: [windows]
     goarch: [arm64]
     ldflags:
-      - -s -w -H=windowsgui
+      - -s -w -H=windowsgui -X main.version={{ .Version }}
     binary: musicalc_arm64
     no_unique_dist_dir: true
 

@@ -13,19 +13,22 @@
 
 2. **Open Inno Setup Compiler**
 
-3. **Open the script:**
-   - File > Open > Select `build/installer/musicalc.iss`
+3. **Compile the installer:**
+   ```powershell
+   .\build\scripts\build-installer.ps1
+   ```
 
-4. **Compile:**
-   - Build > Compile (or press F9)
+   For a release installer, first check out the exact version tag and then run:
+   ```powershell
+   .\build\scripts\build-installer.ps1 -Release
+   ```
 
-5. **Output:**
+4. **Output:**
    - Installer will be created in `build/dist/installer/`
 
 ## Customization
 
 Edit `build/installer/musicalc.iss` to change:
-- `MyAppVersion` - Application version number
 - `MyAppPublisher` - Your name/company
 - `MyAppURL` - Your website/repository URL
 - `AppId` - Unique GUID (keep as-is or generate new one)
@@ -92,15 +95,19 @@ GoReleaser automates the creation of `.deb`, `.rpm`, and `.tar.gz` packages for 
 
    The Windows ARM64 build uses Zig for cross-compilation. The GoReleaser config redirects Zig cache files to `build/.cache/zig-global` and `build/.cache/zig-local`.
 
-   This creates packages in the `build/dist/` directory without requiring a Git tag.
+   Snapshot builds create packages in the `build/dist/` directory without requiring an exact Git tag. Release builds must be run from an exact version tag.
 
 4. **Create a release (requires Git tag)**
    ```bash
-   # Create and push a version tag
-   git tag -a v0.1.0 -m "Release version 0.1.0"
-   git push origin v0.1.0
+   # Create and push tags manually; release tooling does not create or push tags.
+   git tag -a 0.1.0 -m "Release 0.1.0"
+   git push origin 0.1.0
 
-   # Build and publish release using the GoReleaser release commands above
+   # Validate the current exact tag and all GoReleaser configs.
+   python utils/release.py --check-only
+
+   # Run one release config. Publishing is skipped unless --publish is supplied.
+   python utils/release.py --release --config build/release/goreleaser-linux-amd64.yaml
    ```
 
 **Generated artifacts**:

@@ -49,6 +49,7 @@
    ```powershell
    .\build\scripts\build-win.ps1
    ```
+   The script injects the application version from the current Git tag. If the current commit is not exactly tagged, it injects a local dev version derived from the latest tag and commit.
 
 8. **Run the application**
    ```powershell
@@ -104,7 +105,8 @@
    export CXX=g++
    export GOOS=linux
    export GOARCH=amd64
-   go build -ldflags="-s -w" -o build/dist/musicalc_linux_amd64
+   VERSION="$(git describe --tags --exact-match 2>/dev/null || echo dev-$(git rev-parse --short HEAD))"
+   go build -ldflags="-s -w -X main.version=${VERSION}" -o build/dist/musicalc_linux_amd64
    ```
 7. **Build the application for Linux ARM64**
    ```bash
@@ -116,7 +118,8 @@
    export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig
    export GOOS=linux
    export GOARCH=arm64
-   go build -ldflags="-s -w" -o build/dist/musicalc_linux_arm64
+   VERSION="$(git describe --tags --exact-match 2>/dev/null || echo dev-$(git rev-parse --short HEAD))"
+   go build -ldflags="-s -w -X main.version=${VERSION}" -o build/dist/musicalc_linux_arm64
    ```
 
 8. **Build the application for Windows AMD64**
@@ -129,7 +132,8 @@
    export CXX=x86_64-w64-mingw32-g++
    export GOOS=windows
    export GOARCH=amd64
-   go build -ldflags="-s -w" -o build/dist/musicalc_win_amd64.exe
+   VERSION="$(git describe --tags --exact-match 2>/dev/null || echo dev-$(git rev-parse --short HEAD))"
+   go build -ldflags="-s -w -X main.version=${VERSION}" -o build/dist/musicalc_win_amd64.exe
    ```
 
 9. **Build the application for Windows ARM64**
@@ -144,7 +148,8 @@
    export ZIG_LOCAL_CACHE_DIR=build/.cache/zig-local
    export GOOS=windows
    export GOARCH=arm64
-   go build -ldflags="-s -w" -o build/dist/musicalc_win_arm64.exe
+   VERSION="$(git describe --tags --exact-match 2>/dev/null || echo dev-$(git rev-parse --short HEAD))"
+   go build -ldflags="-s -w -X main.version=${VERSION}" -o build/dist/musicalc_win_arm64.exe
    ```
 
 10. **Run the application**

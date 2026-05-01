@@ -1,7 +1,6 @@
 package main
 
 import (
-	_ "embed"
 	"musicalc/internal/ui"
 	"strings"
 
@@ -12,8 +11,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-//go:embed VERSION
-var version string
+var version = "dev"
 
 // CategoryInfo represents a category with tab indices
 type CategoryInfo struct {
