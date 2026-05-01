@@ -2,6 +2,9 @@ version: 2
 project_name: musicalc
 dist: build/dist
 
+snapshot:
+  version_template: "{{ .Env.MUSICALC_SNAPSHOT_VERSION }}"
+
 builds:
   - id: linux-amd64
     env:

@@ -7,6 +7,7 @@ on:
     branches:
       - main
       - master
+      - "[0-9]*.[0-9]*.[0-9]*"
     tags:
       - "[0-9]*.[0-9]*.[0-9]*"
 
@@ -22,10 +23,50 @@ defaults:
     shell: bash
 
 jobs:
+  version:
+    name: Calculate package version
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      package_version: ${{ steps.version.outputs.package_version }}
+      is_release: ${{ steps.version.outputs.is_release }}
+
+    steps:
+      - name: Calculate version
+        id: version
+        env:
+          BUILD_REF_NAME: ${{ github.ref_name }}
+          BUILD_REF_TYPE: ${{ github.ref_type }}
+          BUILD_SHA: ${{ github.sha }}
+        run: |
+          echo "ref_type=${BUILD_REF_TYPE}"
+          echo "ref_name=${BUILD_REF_NAME}"
+          short_sha="${BUILD_SHA:0:7}"
+
+          if [[ "${BUILD_REF_TYPE}" == "tag" ]]; then
+            package_version="${BUILD_REF_NAME}"
+            is_release="true"
+          elif [[ "${BUILD_REF_NAME}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            package_version="${BUILD_REF_NAME}-snapshot-${short_sha}"
+            is_release="false"
+          else
+            package_version="dev-snapshot-${short_sha}"
+            is_release="false"
+          fi
+
+          echo "package_version=${package_version}"
+          echo "is_release=${is_release}"
+          echo "package_version=${package_version}" >> "${GITHUB_OUTPUT}"
+          echo "is_release=${is_release}" >> "${GITHUB_OUTPUT}"
+
   windows-installer:
     name: Windows installer
+    needs: version
     runs-on: windows-latest
     timeout-minutes: 45
+    env:
+      MUSICALC_VERSION: ${{ needs.version.outputs.package_version }}
+      MUSICALC_SNAPSHOT_VERSION: ${{ needs.version.outputs.package_version }}
     defaults:
       run:
         shell: pwsh
@@ -104,7 +145,8 @@ jobs:
       - name: Check GoReleaser config
         run: goreleaser check --config build\release\goreleaser-win-all.yaml
 
-      - name: Build Windows binaries
+      - name: Build Windows snapshot binaries
+        if: needs.version.outputs.is_release != 'true'
         run: |
           New-Item -ItemType Directory -Force build\.cache\gobuildtmp, build\.cache\gocache | Out-Null
           $env:TEMP=(Resolve-Path build\.cache\gobuildtmp).Path
@@ -113,8 +155,23 @@ jobs:
           $env:GOCACHE=(Resolve-Path build\.cache\gocache).Path
           goreleaser build --snapshot --clean --config build\release\goreleaser-win-all.yaml
 
-      - name: Build Windows installer
-        run: .\build\scripts\build-installer.ps1
+      - name: Build Windows release binaries
+        if: needs.version.outputs.is_release == 'true'
+        run: |
+          New-Item -ItemType Directory -Force build\.cache\gobuildtmp, build\.cache\gocache | Out-Null
+          $env:TEMP=(Resolve-Path build\.cache\gobuildtmp).Path
+          $env:TMP=$env:TEMP
+          $env:GOTMPDIR=$env:TEMP
+          $env:GOCACHE=(Resolve-Path build\.cache\gocache).Path
+          goreleaser build --clean --config build\release\goreleaser-win-all.yaml
+
+      - name: Build Windows snapshot installer
+        if: needs.version.outputs.is_release != 'true'
+        run: .\build\scripts\build-installer.ps1 -Version $env:MUSICALC_VERSION
+
+      - name: Build Windows release installer
+        if: needs.version.outputs.is_release == 'true'
+        run: .\build\scripts\build-installer.ps1 -Release
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v7
@@ -131,8 +188,12 @@ jobs:
 
   linux-amd64-packages:
     name: Linux AMD64 packages
+    needs: version
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      MUSICALC_VERSION: ${{ needs.version.outputs.package_version }}
+      MUSICALC_SNAPSHOT_VERSION: ${{ needs.version.outputs.package_version }}
 
     steps:
       - name: Check out repository
@@ -188,8 +249,13 @@ jobs:
       - name: Check GoReleaser config
         run: goreleaser check --config build/release/goreleaser-linux-amd64.yaml
 
-      - name: Build Linux AMD64 packages
+      - name: Build Linux AMD64 snapshot packages
+        if: needs.version.outputs.is_release != 'true'
         run: goreleaser release --snapshot --clean --config build/release/goreleaser-linux-amd64.yaml --skip=publish
+
+      - name: Build Linux AMD64 release packages
+        if: needs.version.outputs.is_release == 'true'
+        run: goreleaser release --clean --config build/release/goreleaser-linux-amd64.yaml --skip=publish
 
       - name: Upload Linux AMD64 artifacts
         uses: actions/upload-artifact@v7
@@ -206,8 +272,12 @@ jobs:
 
   linux-arm64-packages:
     name: Linux ARM64 packages
+    needs: version
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      MUSICALC_VERSION: ${{ needs.version.outputs.package_version }}
+      MUSICALC_SNAPSHOT_VERSION: ${{ needs.version.outputs.package_version }}
 
     steps:
       - name: Check out repository
@@ -292,8 +362,13 @@ jobs:
       - name: Check GoReleaser config
         run: goreleaser check --config build/release/goreleaser-linux-arm64.yaml
 
-      - name: Build Linux ARM64 packages
+      - name: Build Linux ARM64 snapshot packages
+        if: needs.version.outputs.is_release != 'true'
         run: goreleaser release --snapshot --clean --config build/release/goreleaser-linux-arm64.yaml --skip=publish
+
+      - name: Build Linux ARM64 release packages
+        if: needs.version.outputs.is_release == 'true'
+        run: goreleaser release --clean --config build/release/goreleaser-linux-arm64.yaml --skip=publish
 
       - name: Upload Linux ARM64 artifacts
         uses: actions/upload-artifact@v7

@@ -95,13 +95,19 @@ GoReleaser automates the creation of `.deb`, `.rpm`, and `.tar.gz` packages for 
 
    The Windows ARM64 build uses Zig for cross-compilation. The GoReleaser config redirects Zig cache files to `build/.cache/zig-global` and `build/.cache/zig-local`.
 
-   Snapshot builds create packages in the `build/dist/` directory without requiring an exact Git tag. Release builds must be run from an exact version tag.
+   Snapshot builds create packages in the `build/dist/` directory without requiring an exact Git tag. In CI, version branches such as `0.8.8` are built as `0.8.8-snapshot-<shortsha>`. Release builds must be run from an exact Git tag.
 
 4. **Create a release (requires Git tag)**
    ```bash
-   # Create and push tags manually; release tooling does not create or push tags.
-   git tag -a 0.1.0 -m "Release 0.1.0"
-   git push origin 0.1.0
+   # Validate builds on a version branch first, for example 0.8.8.
+   git switch -c 0.8.8
+   git push origin 0.8.8
+
+   # After validation, merge to main and tag the exact main commit.
+   git switch main
+   git pull --ff-only
+   git tag -a 0.8.8 -m "Release 0.8.8"
+   git push origin 0.8.8
 
    # Validate the current exact tag and all GoReleaser configs.
    python utils/release.py --check-only
