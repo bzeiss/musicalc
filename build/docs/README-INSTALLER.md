@@ -8,23 +8,23 @@
 
 1. **Build the application first:**
    ```powershell
-   go build -ldflags="-s -w" -o musicalc.exe
+   .\build\scripts\build-win.ps1
    ```
 
 2. **Open Inno Setup Compiler**
 
 3. **Open the script:**
-   - File → Open → Select `musicalc.iss`
+   - File > Open > Select `build/installer/musicalc.iss`
 
 4. **Compile:**
-   - Build → Compile (or press F9)
+   - Build > Compile (or press F9)
 
 5. **Output:**
-   - Installer will be created in `installer/MusiCalc-Setup-1.0.0.exe`
+   - Installer will be created in `build/dist/installer/`
 
 ## Customization
 
-Edit `musicalc.iss` to change:
+Edit `build/installer/musicalc.iss` to change:
 - `MyAppVersion` - Application version number
 - `MyAppPublisher` - Your name/company
 - `MyAppURL` - Your website/repository URL
@@ -32,15 +32,15 @@ Edit `musicalc.iss` to change:
 
 ## Testing
 
-1. Run the generated installer: `installer/MusiCalc-Setup-1.0.0.exe`
+1. Run the generated installer from `build/dist/installer/`
 2. Install to default location or custom directory
 3. Verify desktop shortcut (if selected)
 4. Test the application runs correctly
-5. Uninstall via Windows Settings → Apps
+5. Uninstall via Windows Settings > Apps
 
 ## Distribution
 
-The installer file (`MusiCalc-Setup-1.0.0.exe`) is a single executable that can be distributed to users. It includes:
+The installer file is a single executable that can be distributed to users. It includes:
 - Application executable
 - App icon
 - Start menu shortcuts
@@ -56,50 +56,49 @@ GoReleaser automates the creation of `.deb`, `.rpm`, and `.tar.gz` packages for 
    go install github.com/goreleaser/goreleaser/v2@latest
    ```
 
-2. **Install Package Dependencies*
+2. **Install Package Dependencies**
    See [Build Instructions](README-BUILD.md).
 
-3. **Building packages with goreleaser**
+3. **Building packages with GoReleaser**
 
    For Linux AMD64:
 
    ```bash
-   goreleaser check --config .goreleaser-linux-amd64.yaml
+   goreleaser check --config build/release/goreleaser-linux-amd64.yaml
    # for snapshot
-   goreleaser release --snapshot --clean --config .goreleaser-linux-amd64.yaml
+   goreleaser release --snapshot --clean --config build/release/goreleaser-linux-amd64.yaml
    # for release
-   goreleaser release --clean --config .goreleaser-linux-amd64.yaml --skip=publish
+   goreleaser release --clean --config build/release/goreleaser-linux-amd64.yaml --skip=publish
    ```
 
    For Linux ARM64:
 
    ```bash
-   goreleaser check --config .goreleaser-linux-arm64.yaml
+   goreleaser check --config build/release/goreleaser-linux-arm64.yaml
    # for snapshot
-   goreleaser release --snapshot --clean --config .goreleaser-linux-arm64.yaml
+   goreleaser release --snapshot --clean --config build/release/goreleaser-linux-arm64.yaml
    # for release
-   goreleaser release --clean --config .goreleaser-linux-arm64.yaml --skip=publish
+   goreleaser release --clean --config build/release/goreleaser-linux-arm64.yaml --skip=publish
    ```
 
    For Windows AMD64/ARM64:
    ```bash
-   goreleaser check --config .goreleaser-cross-win.yaml
+   goreleaser check --config build/release/goreleaser-win-all.yaml
    # for snapshot
-   goreleaser release --snapshot --clean --config .goreleaser-cross-win.yaml
+   goreleaser release --snapshot --clean --config build/release/goreleaser-win-all.yaml
    # for release
-   goreleaser release --clean --config .goreleaser-cross-win.yaml --skip=publish
+   goreleaser release --clean --config build/release/goreleaser-win-all.yaml --skip=publish
    ```
 
-
-   This creates packages in the `dist/` directory without requiring a Git tag.
+   This creates packages in the `build/dist/` directory without requiring a Git tag.
 
 4. **Create a release (requires Git tag)**
    ```bash
    # Create and push a version tag
    git tag -a v0.1.0 -m "Release version 0.1.0"
    git push origin v0.1.0
-   
-   # Build and publish release using the gorelease release commands above
+
+   # Build and publish release using the GoReleaser release commands above
    ```
 
 **Generated artifacts**:
